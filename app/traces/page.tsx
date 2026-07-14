@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { ArrowLeftIcon } from "lucide-react"
+import Link from "next/link";
+import { ArrowLeftIcon } from "lucide-react";
 
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,8 +9,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function TracesPage() {
   return (
@@ -33,7 +33,10 @@ export default function TracesPage() {
             </p>
           </CardContent>
           <CardFooter className="border-t">
-            <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
+            <Link
+              href="/"
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
               <ArrowLeftIcon className="size-4" />
               Back to dashboard
             </Link>
@@ -41,5 +44,5 @@ export default function TracesPage() {
         </Card>
       </main>
     </div>
-  )
+  );
 }

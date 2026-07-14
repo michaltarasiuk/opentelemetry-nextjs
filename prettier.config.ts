@@ -1,5 +1,5 @@
-import type { Config } from "prettier"
+import type { Config } from "prettier";
 
-const config: Config = {}
+const config: Config = {};
 
-export default config
+export default config;

@@ -1,14 +1,12 @@
-import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
   server: {
     OTEL_SERVICE_NAME: z.string().min(1),
     OTEL_EXPORTER_OTLP_ENDPOINT: z.url(),
     OTEL_EXPORTER_OTLP_AUTHORIZATION: z.string().min(1),
-    NEXT_OTEL_VERBOSE: z
-      .enum(["0", "1"])
-      .transform((value) => value === "1"),
+    NEXT_OTEL_VERBOSE: z.enum(["0", "1"]).transform((value) => value === "1"),
   },
   client: {
     NEXT_PUBLIC_OTEL_SERVICE_NAME: z.string().min(1),
@@ -26,4 +24,4 @@ export const env = createEnv({
   },
   emptyStringAsUndefined: true,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
-})
+});

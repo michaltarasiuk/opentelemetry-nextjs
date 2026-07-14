@@ -57,13 +57,16 @@ export function TracePlayground() {
       }
 
       setResult(parsed.data);
+
       toast.success(`Trace completed in ${parsed.data.durationMs}ms`);
     } catch (error) {
-      const message =
+      const errorMessage =
         error instanceof Error ? error.message : "Trace demo request failed";
+
       setResult(null);
-      setError(message);
-      toast.error(message);
+      setError(errorMessage);
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
