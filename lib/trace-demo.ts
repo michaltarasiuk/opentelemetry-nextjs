@@ -2,14 +2,14 @@ import { SpanStatusCode, trace } from "@opentelemetry/api";
 
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
-const TRACER = trace.getTracer("opentelemetry-nextjs");
+const tracer = trace.getTracer("opentelemetry-nextjs");
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function validateRequest(scenario: TraceScenario) {
-  return TRACER.startActiveSpan("validateRequest", async (span) => {
+  return tracer.startActiveSpan("validateRequest", async (span) => {
     try {
       span.setAttribute("demo.scenario", scenario);
       await sleep(10);
@@ -21,7 +21,7 @@ async function validateRequest(scenario: TraceScenario) {
 }
 
 async function cacheLookup(scenario: TraceScenario) {
-  return TRACER.startActiveSpan("cacheLookup", async (span) => {
+  return tracer.startActiveSpan("cacheLookup", async (span) => {
     try {
       const cacheHit = scenario === "fast";
       span.setAttribute("cache.hit", cacheHit);
@@ -34,7 +34,7 @@ async function cacheLookup(scenario: TraceScenario) {
 }
 
 async function dbQuery(scenario: TraceScenario) {
-  return TRACER.startActiveSpan("dbQuery", async (span) => {
+  return tracer.startActiveSpan("dbQuery", async (span) => {
     try {
       await sleep(scenario === "slow" || scenario === "error" ? 700 : 20);
 
@@ -60,7 +60,7 @@ async function buildResponse(
   cacheHit: boolean,
   rows: number | null,
 ) {
-  return TRACER.startActiveSpan("buildResponse", async (span) => {
+  return tracer.startActiveSpan("buildResponse", async (span) => {
     try {
       await sleep(20);
       span.setAttribute("demo.scenario", scenario);
@@ -79,7 +79,7 @@ export async function runTraceDemo(
 ): Promise<TraceDemoResponse> {
   const startedAt = Date.now();
 
-  return TRACER.startActiveSpan("runTraceDemo", async (span) => {
+  return tracer.startActiveSpan("runTraceDemo", async (span) => {
     try {
       span.setAttribute("demo.scenario", scenario);
 
