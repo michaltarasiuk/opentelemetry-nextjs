@@ -47,40 +47,22 @@ export function TracePlayground() {
         `/api/trace-demo?${new URLSearchParams({ scenario })}`,
       );
       if (!response.ok) {
-        throw response;
+        throw new Error("Trace demo request failed");
       }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const message =
-          typeof data.error === "string"
-            ? data.error
-            : "Trace demo request failed";
-        setError(message);
-        setResult(null);
-        toast.error(message);
-        return;
-      }
-
-      const parsed = TRACE_DEMO_RESPONSE_SCHEMA.safeParse(data);
+      const json = await response.json();
+      const parsed = TRACE_DEMO_RESPONSE_SCHEMA.safeParse(json);
       if (!parsed.success) {
-        const message = "Invalid trace demo response";
-        setError(message);
-        setResult(null);
-        toast.error(message);
-        return;
+        throw new Error("Invalid trace demo response");
       }
 
       setResult(parsed.data);
       toast.success(`Trace completed in ${parsed.data.durationMs}ms`);
-    } catch (requestError) {
+    } catch (error) {
       const message =
-        requestError instanceof Error
-          ? requestError.message
-          : "Trace demo request failed";
-      setError(message);
+        error instanceof Error ? error.message : "Trace demo request failed";
       setResult(null);
+      setError(message);
       toast.error(message);
     } finally {
       setLoading(false);
