@@ -1,50 +1,50 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 interface HealthResponse {
-  status: string
-  service: string
+  status: string;
+  service: string;
 }
 
 export function HealthStatus() {
-  const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let ignored = false
+    let ignored = false;
 
     async function fetchHealth() {
       try {
-        const response = await fetch("/api/health")
+        const response = await fetch("/api/health");
         if (!response.ok) {
-          throw new Error("Health check failed")
+          throw new Error("Health check failed");
         }
 
-        const data = (await response.json()) as HealthResponse
+        const data = (await response.json()) as HealthResponse;
         if (!ignored) {
-          setHealth(data)
+          setHealth(data);
         }
       } catch {
         if (!ignored) {
-          setHealth(null)
+          setHealth(null);
         }
       } finally {
         if (!ignored) {
-          setLoading(false)
+          setLoading(false);
         }
       }
     }
 
-    void fetchHealth()
+    void fetchHealth();
 
     return () => {
-      ignored = true
-    }
-  }, [])
+      ignored = true;
+    };
+  }, []);
 
   return (
     <span
@@ -65,5 +65,5 @@ export function HealthStatus() {
         </span>
       )}
     </span>
-  )
+  );
 }
