@@ -1,6 +1,6 @@
-type PostcssConfig = {
+interface PostcssConfig {
   plugins: Record<string, object>;
-};
+}
 
 const config: PostcssConfig = {
   plugins: {

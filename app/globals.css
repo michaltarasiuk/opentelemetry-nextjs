@@ -4,12 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 @theme inline {
   --font-heading: var(--font-geist-sans);
   --font-sans: var(--font-geist-sans);
@@ -132,5 +126,9 @@
   }
   html {
     @apply font-sans;
+  }
+  code,
+  .code-inline {
+    @apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground;
   }
 }
