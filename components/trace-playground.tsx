@@ -23,11 +23,9 @@ import {
 } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 import { runTraceDemo } from "@/lib/trace-demo";
-
-const SCENARIOS: TraceScenario[] = ["fast", "slow", "error"];
 
 export function TracePlayground() {
   const [scenario, setScenario] = useState<TraceScenario>("fast");
@@ -76,16 +74,28 @@ export function TracePlayground() {
                 onValueChange={(value) => setScenario(value as TraceScenario)}
               >
                 <TabsList>
-                  {SCENARIOS.map((value) => (
-                    <TabsTrigger key={value} value={value}>
-                      {SCENARIO_DETAILS[value].label}
-                    </TabsTrigger>
-                  ))}
+                  <TabsTrigger value="fast">Fast</TabsTrigger>
+                  <TabsTrigger value="slow">Slow</TabsTrigger>
+                  <TabsTrigger value="error">Error</TabsTrigger>
                 </TabsList>
+                <TabsContent value="fast">
+                  <FieldDescription>
+                    Cache hit with short delays — validateRequest, cacheLookup,
+                    buildResponse.
+                  </FieldDescription>
+                </TabsContent>
+                <TabsContent value="slow">
+                  <FieldDescription>
+                    Cache miss with a simulated DB query — compare latency in
+                    your collector.
+                  </FieldDescription>
+                </TabsContent>
+                <TabsContent value="error">
+                  <FieldDescription>
+                    Fails inside dbQuery — HTTP 500 with a failed span status.
+                  </FieldDescription>
+                </TabsContent>
               </Tabs>
-              <FieldDescription>
-                {SCENARIO_DETAILS[scenario].description}
-              </FieldDescription>
             </FieldContent>
           </Field>
         </FieldGroup>
@@ -131,23 +141,3 @@ export function TracePlayground() {
     </Card>
   );
 }
-
-const SCENARIO_DETAILS: Record<
-  TraceScenario,
-  { label: string; description: string }
-> = {
-  fast: {
-    label: "Fast",
-    description:
-      "Cache hit with short delays — validateRequest, cacheLookup, buildResponse.",
-  },
-  slow: {
-    label: "Slow",
-    description:
-      "Cache miss with a simulated DB query — compare latency in your collector.",
-  },
-  error: {
-    label: "Error",
-    description: "Fails inside dbQuery — HTTP 500 with a failed span status.",
-  },
-};
