@@ -80,19 +80,20 @@ export function TracePlayground() {
                 </TabsList>
                 <TabsContent value="fast">
                   <FieldDescription>
-                    Cache hit with short delays — validateRequest, cacheLookup,
-                    buildResponse.
+                    Cache hit with short delays across validateRequest,
+                    cacheLookup, and buildResponse.
                   </FieldDescription>
                 </TabsContent>
                 <TabsContent value="slow">
                   <FieldDescription>
-                    Cache miss with a simulated DB query — compare latency in
+                    Cache miss with a simulated DB query. Compare latency in
                     your collector.
                   </FieldDescription>
                 </TabsContent>
                 <TabsContent value="error">
                   <FieldDescription>
-                    Fails inside dbQuery — HTTP 500 with a failed span status.
+                    Fails inside dbQuery, returning HTTP 500 with a failed span
+                    status.
                   </FieldDescription>
                 </TabsContent>
               </Tabs>
