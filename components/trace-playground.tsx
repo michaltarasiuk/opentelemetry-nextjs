@@ -24,11 +24,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  TRACE_DEMO_RESPONSE_SCHEMA,
-  type TraceDemoResponse,
-  type TraceScenario,
-} from "@/lib/schemas";
+import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
+import { runTraceDemo } from "@/lib/trace-demo";
 
 const SCENARIOS: TraceScenario[] = ["fast", "slow", "error"];
 
@@ -43,30 +40,17 @@ export function TracePlayground() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/trace-demo?${new URLSearchParams({ scenario })}`,
-      );
-      if (!response.ok) {
-        throw new Error("Trace demo request failed");
-      }
+      const result = await runTraceDemo(scenario);
 
-      const json = await response.json();
-      const parsed = TRACE_DEMO_RESPONSE_SCHEMA.safeParse(json);
-      if (!parsed.success) {
-        throw new Error("Invalid trace demo response");
-      }
-
-      setResult(parsed.data);
-
-      toast.success(`Trace completed in ${parsed.data.durationMs}ms`);
+      setResult(result);
+      toast.success(`Trace completed in ${result.durationMs}ms`);
     } catch (error) {
-      const errorMessage =
+      const message =
         error instanceof Error ? error.message : "Trace demo request failed";
 
       setResult(null);
-      setError(errorMessage);
-
-      toast.error(errorMessage);
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

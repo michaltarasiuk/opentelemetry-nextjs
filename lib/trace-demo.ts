@@ -1,3 +1,5 @@
+"use server";
+
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";

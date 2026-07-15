@@ -3,10 +3,6 @@ import { z } from "zod";
 export const TRACE_SCENARIO_SCHEMA = z.enum(["fast", "slow", "error"]);
 export type TraceScenario = z.infer<typeof TRACE_SCENARIO_SCHEMA>;
 
-export const TRACE_DEMO_QUERY_SCHEMA = z.object({
-  scenario: TRACE_SCENARIO_SCHEMA.default("fast"),
-});
-
 export const TRACE_DEMO_RESPONSE_SCHEMA = z.object({
   scenario: TRACE_SCENARIO_SCHEMA,
   durationMs: z.number().int().nonnegative(),
