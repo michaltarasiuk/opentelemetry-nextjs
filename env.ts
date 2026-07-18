@@ -3,13 +3,13 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    OTEL_SERVICE_NAME: z.string().min(1),
+    OTEL_SERVICE_NAME: z.string(),
     OTEL_EXPORTER_OTLP_ENDPOINT: z.url(),
-    OTEL_EXPORTER_OTLP_AUTHORIZATION: z.string().min(1),
+    OTEL_EXPORTER_OTLP_AUTHORIZATION: z.string().optional(),
     NEXT_OTEL_VERBOSE: z.enum(["0", "1"]).transform((value) => value === "1"),
   },
   client: {
-    NEXT_PUBLIC_OTEL_SERVICE_NAME: z.string().min(1),
+    NEXT_PUBLIC_OTEL_SERVICE_NAME: z.string(),
     NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT: z.literal("/api/otel"),
   },
   runtimeEnv: {

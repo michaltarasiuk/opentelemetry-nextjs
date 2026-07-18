@@ -11,7 +11,9 @@ export async function POST(
   const targetUrl = new URL(targetPath, env.OTEL_EXPORTER_OTLP_ENDPOINT);
 
   const headers = new Headers();
-  headers.set("authorization", env.OTEL_EXPORTER_OTLP_AUTHORIZATION);
+  if (env.OTEL_EXPORTER_OTLP_AUTHORIZATION) {
+    headers.set("authorization", env.OTEL_EXPORTER_OTLP_AUTHORIZATION);
+  }
 
   const contentType = request.headers.get("content-type");
   if (contentType) {
