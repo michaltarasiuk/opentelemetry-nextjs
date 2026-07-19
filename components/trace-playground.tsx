@@ -4,6 +4,8 @@ import { CircleAlertIcon, PlayIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +26,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 import { runTraceDemo } from "@/lib/trace-demo";
 
 export function TracePlayground() {

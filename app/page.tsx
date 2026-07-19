@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import {
   ActivityIcon,
   ArrowRightIcon,
@@ -5,7 +7,6 @@ import {
   RadioIcon,
 } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { HealthStatus } from "@/components/health-status";
 import { TracePlayground } from "@/components/trace-playground";
