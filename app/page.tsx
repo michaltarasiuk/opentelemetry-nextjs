@@ -7,6 +7,8 @@ import {
   RadioIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 import { HealthStatus } from "@/components/health-status";
 import { MetricsPlayground } from "@/components/metrics-playground";
@@ -22,6 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { runTraceDemo } from "@/lib/trace-demo";
 import { cn } from "@/lib/utils";
 
@@ -51,9 +54,52 @@ function StatCard({ icon, label, value, hint }: StatCardProps) {
   );
 }
 
-export default async function Home() {
+async function WarmupStatCards() {
+  // Without this the warmup runs once at build time and every visitor sees the
+  // same baked-in duration, which is the opposite of what this card documents.
+  await connection();
   const warmup = await runTraceDemo("fast");
 
+  return (
+    <>
+      <StatCard
+        icon={<ActivityIcon className="size-4" />}
+        label="Warmup trace"
+        value={`${warmup.durationMs}ms`}
+        hint={`Server-rendered ${warmup.scenario} scenario on page load.`}
+      />
+      <StatCard
+        icon={<GaugeIcon className="size-4" />}
+        label="Cache status"
+        value={warmup.cacheHit ? "Hit" : "Miss"}
+        hint={warmup.message}
+      />
+    </>
+  );
+}
+
+function WarmupStatCardsFallback() {
+  const placeholder = <Spinner className="size-5 text-muted-foreground" />;
+
+  return (
+    <>
+      <StatCard
+        icon={<ActivityIcon className="size-4" />}
+        label="Warmup trace"
+        value={placeholder}
+        hint="Running the server-rendered warmup scenario."
+      />
+      <StatCard
+        icon={<GaugeIcon className="size-4" />}
+        label="Cache status"
+        value={placeholder}
+        hint="Waiting on the warmup trace."
+      />
+    </>
+  );
+}
+
+export default function Home() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-6 md:py-12">
@@ -78,18 +124,9 @@ export default async function Home() {
         <Separator />
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            icon={<ActivityIcon className="size-4" />}
-            label="Warmup trace"
-            value={`${warmup.durationMs}ms`}
-            hint={`Server-rendered ${warmup.scenario} scenario on page load.`}
-          />
-          <StatCard
-            icon={<GaugeIcon className="size-4" />}
-            label="Cache status"
-            value={warmup.cacheHit ? "Hit" : "Miss"}
-            hint={warmup.message}
-          />
+          <Suspense fallback={<WarmupStatCardsFallback />}>
+            <WarmupStatCards />
+          </Suspense>
           <StatCard
             icon={<RadioIcon className="size-4" />}
             label="Service health"
