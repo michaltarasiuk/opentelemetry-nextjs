@@ -58,6 +58,6 @@ export async function POST(
 
 function parseRawHeaders(rawHeaders: string) {
   return rawHeaders
-    .split(",")
+    .split(", ")
     .map((header) => header.split("=") as [string, string]);
 }
