@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 
 import { HealthStatus } from "@/components/health-status";
+import { MetricsPlayground } from "@/components/metrics-playground";
 import { TracePlayground } from "@/components/trace-playground";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -60,14 +61,16 @@ export default async function Home() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge>Server OTel</Badge>
             <Badge variant="secondary">Browser OTel</Badge>
+            <Badge variant="outline">Metrics</Badge>
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
               OpenTelemetry Dashboard
             </h1>
             <p className="max-w-2xl text-muted-foreground">
-              Explore server and browser tracing in Next.js. Run demo scenarios
-              and inspect linked spans in your collector.
+              Explore server and browser tracing and metrics in Next.js. Run
+              demo scenarios and inspect linked spans and counters in your
+              collector.
             </p>
           </div>
         </header>
@@ -96,8 +99,9 @@ export default async function Home() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="flex flex-col gap-6 lg:col-span-2">
             <TracePlayground />
+            <MetricsPlayground />
           </div>
 
           <aside className="flex flex-col gap-6">
@@ -105,7 +109,7 @@ export default async function Home() {
               <CardHeader>
                 <CardTitle>Navigation demo</CardTitle>
                 <CardDescription>
-                  Emit a route.change span on client navigation.
+                  Emit a route.change span and counter on client navigation.
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -1,145 +1,137 @@
 "use client";
 
-import { CircleAlertIcon, PlayIcon } from "lucide-react";
-import { useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 
+import type { DemoPlaygroundMeta } from "@/components/demo-playground";
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldGroup,
-  FieldTitle,
-} from "@/components/ui/field";
-import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { runTraceDemo } from "@/lib/trace-demo";
+import { DemoPlayground } from "@/components/demo-playground";
+import { FieldDescription } from "@/components/ui/field";
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { runTraceDemoAction } from "@/lib/actions";
+import { recordBrowserClick } from "@/lib/metrics.client";
+import { TRACE_SCENARIO_SCHEMA } from "@/lib/schemas";
 
-export function TracePlayground() {
+const META: DemoPlaygroundMeta = {
+  title: "Trace playground",
+  description:
+    "Trigger scenarios from the browser to generate linked client and server spans.",
+  runLabel: "Run trace",
+  runningLabel: "Running…",
+  errorTitle: "Trace failed",
+};
+
+interface TraceRunState {
+  result: TraceDemoResponse | null;
+  error: string | null;
+}
+
+const INITIAL_RUN_STATE: TraceRunState = { result: null, error: null };
+
+async function reduceTraceRun(
+  _previous: TraceRunState,
+  scenario: TraceScenario,
+): Promise<TraceRunState> {
+  try {
+    const result = await runTraceDemoAction(scenario);
+    toast.success(`Trace completed in ${result.durationMs}ms`);
+    return { result, error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Trace demo request failed";
+    toast.error(message);
+    return { result: null, error: message };
+  }
+}
+
+function TracePlaygroundProvider({ children }: { children: ReactNode }) {
   const [scenario, setScenario] = useState<TraceScenario>("fast");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<TraceDemoResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [runState, dispatchRun, pending] = useActionState(
+    reduceTraceRun,
+    INITIAL_RUN_STATE,
+  );
 
-  async function runTrace() {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await runTraceDemo(scenario);
-
-      setResult(result);
-      toast.success(`Trace completed in ${result.durationMs}ms`);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Trace demo request failed";
-
-      setResult(null);
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
+  function selectScenario(value: string) {
+    const parsed = TRACE_SCENARIO_SCHEMA.safeParse(value);
+    if (parsed.success) {
+      setScenario(parsed.data);
     }
   }
 
+  function run() {
+    recordBrowserClick("trace-playground.run");
+    startTransition(() => dispatchRun(scenario));
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Trace playground</CardTitle>
-        <CardDescription>
-          Trigger scenarios from the browser to generate linked client and
-          server spans.
-        </CardDescription>
-      </CardHeader>
+    <DemoPlayground.Provider
+      state={{
+        scenario,
+        pending,
+        result: runState.result,
+        error: runState.error,
+      }}
+      actions={{ setScenario: selectScenario, run }}
+      meta={META}
+    >
+      {children}
+    </DemoPlayground.Provider>
+  );
+}
 
-      <CardContent>
-        <FieldGroup>
-          <Field>
-            <FieldTitle>Scenario</FieldTitle>
-            <FieldContent>
-              <Tabs
-                value={scenario}
-                onValueChange={(value) => setScenario(value as TraceScenario)}
-              >
-                <TabsList>
-                  <TabsTrigger value="fast">Fast</TabsTrigger>
-                  <TabsTrigger value="slow">Slow</TabsTrigger>
-                  <TabsTrigger value="error">Error</TabsTrigger>
-                </TabsList>
-                <TabsContent value="fast">
-                  <FieldDescription>
-                    Cache hit with short delays across validateRequest,
-                    cacheLookup, and buildResponse.
-                  </FieldDescription>
-                </TabsContent>
-                <TabsContent value="slow">
-                  <FieldDescription>
-                    Cache miss with a simulated DB query. Compare latency in
-                    your collector.
-                  </FieldDescription>
-                </TabsContent>
-                <TabsContent value="error">
-                  <FieldDescription>
-                    Fails inside dbQuery, returning HTTP 500 with a failed span
-                    status.
-                  </FieldDescription>
-                </TabsContent>
-              </Tabs>
-            </FieldContent>
-          </Field>
-        </FieldGroup>
-      </CardContent>
+function TraceScenarioTabs() {
+  return (
+    <>
+      <TabsList>
+        <TabsTrigger value="fast">Fast</TabsTrigger>
+        <TabsTrigger value="slow">Slow</TabsTrigger>
+        <TabsTrigger value="error">Error</TabsTrigger>
+      </TabsList>
+      <TabsContent value="fast">
+        <FieldDescription>
+          Cache hit with short delays across validateRequest, cacheLookup, and
+          buildResponse.
+        </FieldDescription>
+      </TabsContent>
+      <TabsContent value="slow">
+        <FieldDescription>
+          Cache miss with a simulated DB query. Compare latency in your
+          collector.
+        </FieldDescription>
+      </TabsContent>
+      <TabsContent value="error">
+        <FieldDescription>
+          Fails inside dbQuery, returning HTTP 500 with a failed span status.
+        </FieldDescription>
+      </TabsContent>
+    </>
+  );
+}
 
-      <CardFooter className="flex-col items-stretch gap-4 border-t">
-        <Button onClick={() => void runTrace()} disabled={loading}>
-          {loading ? (
-            <>
-              <Spinner className="size-4" />
-              Running…
-            </>
-          ) : (
-            <>
-              <PlayIcon className="size-4" />
-              Run trace
-            </>
-          )}
-        </Button>
+function TracePlaygroundFrame() {
+  return (
+    <DemoPlayground.Frame>
+      <DemoPlayground.Header />
+      <DemoPlayground.Content>
+        <DemoPlayground.ScenarioField>
+          <TraceScenarioTabs />
+        </DemoPlayground.ScenarioField>
+      </DemoPlayground.Content>
+      <DemoPlayground.Actions />
+    </DemoPlayground.Frame>
+  );
+}
 
-        {(result || error) && (
-          <>
-            <Separator />
-            <Field>
-              <FieldTitle>Response</FieldTitle>
-              <FieldContent>
-                {error ? (
-                  <Alert variant="destructive">
-                    <CircleAlertIcon />
-                    <AlertTitle>Trace failed</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                ) : (
-                  <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
-                    {JSON.stringify(result, null, 2)}
-                  </pre>
-                )}
-              </FieldContent>
-            </Field>
-          </>
-        )}
-      </CardFooter>
-    </Card>
+export function TracePlayground() {
+  return (
+    <TracePlaygroundProvider>
+      <TracePlaygroundFrame />
+    </TracePlaygroundProvider>
   );
 }

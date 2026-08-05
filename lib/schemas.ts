@@ -12,3 +12,23 @@ export const TRACE_DEMO_RESPONSE_SCHEMA = z.object({
 });
 
 export type TraceDemoResponse = z.infer<typeof TRACE_DEMO_RESPONSE_SCHEMA>;
+
+export const METRIC_SCENARIO_SCHEMA = z.enum(["increment", "batch", "error"]);
+export type MetricScenario = z.infer<typeof METRIC_SCENARIO_SCHEMA>;
+
+export const METRIC_DEMO_RESPONSE_SCHEMA = z.object({
+  scenario: METRIC_SCENARIO_SCHEMA,
+  durationMs: z.number().int().nonnegative(),
+  requestsRecorded: z.number().int().positive(),
+  cacheDelta: z.number().int(),
+  message: z.string(),
+});
+
+export type MetricDemoResponse = z.infer<typeof METRIC_DEMO_RESPONSE_SCHEMA>;
+
+export const HEALTH_RESPONSE_SCHEMA = z.object({
+  status: z.literal("ok"),
+  service: z.string(),
+});
+
+export type HealthResponse = z.infer<typeof HEALTH_RESPONSE_SCHEMA>;

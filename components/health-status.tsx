@@ -2,47 +2,54 @@
 
 import { useEffect, useState } from "react";
 
+import type { HealthResponse } from "@/lib/schemas";
+
 import { Spinner } from "@/components/ui/spinner";
+import { HEALTH_RESPONSE_SCHEMA } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
-interface HealthResponse {
-  status: string;
-  service: string;
-}
+const POLL_INTERVAL_MS = 15_000;
 
 export function HealthStatus() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let ignored = false;
+    const controller = new AbortController();
 
-    async function fetchHealth() {
+    async function check() {
+      // A backgrounded dashboard should stop emitting health spans.
+      if (document.hidden) {
+        return;
+      }
+
       try {
-        const response = await fetch("/api/health");
+        const response = await fetch("/api/health", {
+          signal: controller.signal,
+        });
         if (!response.ok) {
-          throw new Error("Health check failed");
+          throw new Error(`Health check returned ${response.status}`);
         }
 
-        const data = (await response.json()) as HealthResponse;
-        if (!ignored) {
-          setHealth(data);
-        }
+        setHealth(HEALTH_RESPONSE_SCHEMA.parse(await response.json()));
       } catch {
-        if (!ignored) {
-          setHealth(null);
+        if (controller.signal.aborted) {
+          return;
         }
+        setHealth(null);
       } finally {
-        if (!ignored) {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
     }
 
-    void fetchHealth();
+    void check();
+    const interval = setInterval(() => void check(), POLL_INTERVAL_MS);
 
     return () => {
-      ignored = true;
+      controller.abort();
+      clearInterval(interval);
     };
   }, []);
 

@@ -1,8 +1,29 @@
+import { metrics } from "@opentelemetry/api";
+
+import type { HealthResponse } from "@/lib/schemas";
+
 import { env } from "@/env";
 
+const healthCheckCounter = metrics
+  .getMeter("opentelemetry-nextjs")
+  .createCounter("demo.health.checks", {
+    description: "Number of health endpoint checks",
+    unit: "1",
+  });
+
 export async function GET() {
-  return Response.json({
+  healthCheckCounter.add(1, { "http.route": "/api/health" });
+
+  const body: HealthResponse = {
     status: "ok",
     service: env.OTEL_SERVICE_NAME,
+  };
+
+  // A cached health check would report liveness of a past request, and the
+  // browser poll would stop reaching the counter above.
+  return Response.json(body, {
+    headers: {
+      "cache-control": "no-store",
+    },
   });
 }
