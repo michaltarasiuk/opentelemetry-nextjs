@@ -23,8 +23,12 @@ export async function POST(
   }
 
   const headers = new Headers();
-  if (env.OTEL_EXPORTER_OTLP_AUTHORIZATION) {
-    headers.set("authorization", env.OTEL_EXPORTER_OTLP_AUTHORIZATION);
+  if (env.OTEL_EXPORTER_OTLP_HEADERS) {
+    for (const [name, value] of parseRawHeaders(
+      env.OTEL_EXPORTER_OTLP_HEADERS,
+    )) {
+      headers.set(name, value);
+    }
   }
 
   const contentType = request.headers.get("content-type");
@@ -50,4 +54,10 @@ export async function POST(
     status: response.status,
     headers: responseHeaders,
   });
+}
+
+function parseRawHeaders(rawHeaders: string) {
+  return rawHeaders
+    .split(",")
+    .map((header) => header.split("=") as [string, string]);
 }
