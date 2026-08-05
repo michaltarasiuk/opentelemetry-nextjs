@@ -40,7 +40,9 @@ function StatCard({ icon, label, value, hint }: StatCardProps) {
     <Card>
       <CardHeader>
         <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-2xl font-semibold tabular-nums">
+        {/* The min height reserves the resolved text's line box so a loading
+            placeholder shorter than the text does not shift the card. */}
+        <CardTitle className="flex min-h-8 items-center text-2xl font-semibold tabular-nums">
           {value}
         </CardTitle>
         <CardAction>

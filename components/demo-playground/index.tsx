@@ -122,7 +122,11 @@ function RunButton() {
 function Response() {
   const { state, meta } = useDemoPlayground();
 
-  if (!state.result && !state.error) {
+  // Mounting on completion instead would grow the card at the moment the
+  // spinner disappears, shifting everything below it. Claiming the space when
+  // the run starts ties the movement to the click that caused it, and a fixed
+  // height keeps later runs from resizing it as the payload changes.
+  if (!state.pending && !state.result && !state.error) {
     return null;
   }
 
@@ -132,17 +136,25 @@ function Response() {
       <Field>
         <FieldTitle>Response</FieldTitle>
         <FieldContent>
-          {state.error ? (
-            <Alert variant="destructive">
-              <CircleAlertIcon />
-              <AlertTitle>{meta.errorTitle}</AlertTitle>
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          ) : (
-            <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
-              {JSON.stringify(state.result, null, 2)}
-            </pre>
-          )}
+          <div className="min-h-48">
+            {state.error ? (
+              <Alert variant="destructive">
+                <CircleAlertIcon />
+                <AlertTitle>{meta.errorTitle}</AlertTitle>
+                <AlertDescription>{state.error}</AlertDescription>
+              </Alert>
+            ) : (
+              <pre className="h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
+                {state.result ? (
+                  JSON.stringify(state.result, null, 2)
+                ) : (
+                  <span className="text-muted-foreground">
+                    {meta.runningLabel}
+                  </span>
+                )}
+              </pre>
+            )}
+          </div>
         </FieldContent>
       </Field>
     </>
