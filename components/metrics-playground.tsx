@@ -81,7 +81,10 @@ async function reduceMetricsRun(
     return {
       result: null,
       error: message,
-      totals: { ...totals, runs: totals.runs + 1 },
+      totals: {
+        ...totals,
+        runs: totals.runs + 1,
+      },
     };
   }
 }

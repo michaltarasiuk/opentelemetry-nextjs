@@ -41,12 +41,18 @@ async function reduceTraceRun(
   try {
     const result = await runTraceDemoAction(scenario);
     toast.success(`Trace completed in ${result.durationMs}ms`);
-    return { result, error: null };
+    return {
+      result,
+      error: null,
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Trace demo request failed";
     toast.error(message);
-    return { result: null, error: message };
+    return {
+      result: null,
+      error: message,
+    };
   }
 }
 
