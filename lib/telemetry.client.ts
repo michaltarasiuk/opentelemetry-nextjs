@@ -24,7 +24,8 @@ export function setupBrowserTelemetry(): Promise<void> {
 // the main bundle behind dynamic imports.
 async function initialiseBrowserTelemetry() {
   const { metrics } = await import("@opentelemetry/api");
-  const { WebTracerProvider } = await import("@opentelemetry/sdk-trace-web");
+  const { WebTracerProvider, ConsoleSpanExporter, SimpleSpanProcessor } =
+    await import("@opentelemetry/sdk-trace-web");
   const { BatchSpanProcessor } = await import("@opentelemetry/sdk-trace-base");
   const { OTLPTraceExporter } =
     await import("@opentelemetry/exporter-trace-otlp-http");
@@ -50,6 +51,7 @@ async function initialiseBrowserTelemetry() {
   const tracerProvider = new WebTracerProvider({
     resource,
     spanProcessors: [
+      new SimpleSpanProcessor(new ConsoleSpanExporter()),
       new BatchSpanProcessor(
         new OTLPTraceExporter({ url: `${origin}/api/otel/v1/traces` }),
       ),
