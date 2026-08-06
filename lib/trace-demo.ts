@@ -12,11 +12,6 @@ const traceDemoCounter = meter.createCounter("demo.trace.runs", {
   unit: "1",
 });
 
-/**
- * Ends the span on every path, and marks it failed with the thrown exception
- * so a failed run is visible in the collector rather than looking like a
- * successful span that simply stopped early.
- */
 async function withSpan<T>(name: string, fn: (span: Span) => Promise<T>) {
   return tracer.startActiveSpan(name, async (span) => {
     try {
