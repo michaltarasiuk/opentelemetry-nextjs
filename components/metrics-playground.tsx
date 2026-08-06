@@ -49,7 +49,11 @@ interface MetricsRunState {
 const INITIAL_RUN_STATE: MetricsRunState = {
   result: null,
   error: null,
-  totals: { runs: 0, requestsRecorded: 0, cacheDelta: 0 },
+  totals: {
+    runs: 0,
+    requestsRecorded: 0,
+    cacheDelta: 0,
+  },
 };
 
 const MetricsSessionContext = createContext<SessionTotals | null>(null);

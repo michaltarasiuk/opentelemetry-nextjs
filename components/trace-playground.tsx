@@ -32,7 +32,10 @@ interface TraceRunState {
   error: string | null;
 }
 
-const INITIAL_RUN_STATE: TraceRunState = { result: null, error: null };
+const INITIAL_RUN_STATE: TraceRunState = {
+  result: null,
+  error: null,
+};
 
 async function reduceTraceRun(
   _previous: TraceRunState,
