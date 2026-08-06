@@ -184,7 +184,7 @@ function MetricsSessionTotals() {
             </dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Cache Δ</dt>
+            <dt className="text-muted-foreground">Cache</dt>
             <dd className="font-medium tabular-nums">{totals.cacheDelta}</dd>
           </div>
         </dl>

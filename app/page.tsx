@@ -7,7 +7,7 @@ import {
   RadioIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { after, connection } from "next/server";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { HealthStatus } from "@/components/health-status";
