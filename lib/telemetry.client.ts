@@ -1,3 +1,5 @@
+import { SpanProcessor } from "@opentelemetry/sdk-trace-base";
+
 import { env } from "@/env";
 
 let setup: Promise<void> | null = null;
@@ -48,14 +50,18 @@ async function initialiseBrowserTelemetry() {
 
   const { origin } = window.location;
 
+  const spanProcessors: SpanProcessor[] = [
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({ url: `${origin}/api/otel/v1/traces` }),
+    ),
+  ];
+  if (env.NODE_ENV === "development") {
+    spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  }
+
   const tracerProvider = new WebTracerProvider({
     resource,
-    spanProcessors: [
-      new SimpleSpanProcessor(new ConsoleSpanExporter()),
-      new BatchSpanProcessor(
-        new OTLPTraceExporter({ url: `${origin}/api/otel/v1/traces` }),
-      ),
-    ],
+    spanProcessors,
   });
 
   tracerProvider.register({ contextManager: new ZoneContextManager() });
