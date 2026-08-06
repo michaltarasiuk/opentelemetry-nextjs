@@ -67,7 +67,9 @@ async function initialiseBrowserTelemetry() {
     spanProcessors,
   });
 
-  tracerProvider.register({ contextManager: new ZoneContextManager() });
+  tracerProvider.register({
+    contextManager: new ZoneContextManager(),
+  });
 
   const meterProvider = new MeterProvider({
     resource,
