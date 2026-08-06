@@ -81,8 +81,6 @@ async function reduceMetricsRun(
     const message =
       error instanceof Error ? error.message : "Metrics demo request failed";
     toast.error(message);
-    // A failed run still counts as a run, but the server-side deltas it would
-    // have reported are unknown, so only the run tally moves.
     return {
       result: null,
       error: message,

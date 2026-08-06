@@ -11,6 +11,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { HealthStatus } from "@/components/health-status";
+import { LogsPlayground } from "@/components/logs-playground";
 import { MetricsPlayground } from "@/components/metrics-playground";
 import { TracePlayground } from "@/components/trace-playground";
 import { Badge } from "@/components/ui/badge";
@@ -40,8 +41,6 @@ function StatCard({ icon, label, value, hint }: StatCardProps) {
     <Card>
       <CardHeader>
         <CardDescription>{label}</CardDescription>
-        {/* The min height reserves the resolved text's line box so a loading
-            placeholder shorter than the text does not shift the card. */}
         <CardTitle className="flex min-h-8 items-center text-2xl font-semibold tabular-nums">
           {value}
         </CardTitle>
@@ -141,6 +140,7 @@ export default function Home() {
           <div className="flex flex-col gap-6 lg:col-span-2">
             <TracePlayground />
             <MetricsPlayground />
+            <LogsPlayground />
           </div>
 
           <aside className="flex flex-col gap-6">

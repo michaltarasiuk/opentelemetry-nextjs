@@ -1,4 +1,8 @@
+import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+
 import { env } from "@/env";
+
+const logger = logs.getLogger("opentelemetry-nextjs");
 
 // This route forwards browser telemetry with the collector's credentials
 // attached, so the caller-supplied path is matched against a fixed set of OTLP
@@ -19,6 +23,12 @@ export async function POST(
   const signalPath = path.join("/");
 
   if (!OTLP_SIGNAL_PATHS.has(signalPath)) {
+    logger.emit({
+      severityNumber: SeverityNumber.WARN,
+      severityText: "WARN",
+      body: "OTLP proxy received unknown signal path",
+      attributes: { "otel.proxy.path": signalPath },
+    });
     return new Response(null, { status: 404 });
   }
 

@@ -1,5 +1,7 @@
+import type { LogRecordProcessor } from "@opentelemetry/sdk-logs";
+import type { SpanProcessor } from "@opentelemetry/sdk-trace-base";
+
 import { defaultResource } from "@opentelemetry/resources";
-import { SpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 import { env } from "@/env";
 
@@ -23,27 +25,34 @@ export function setupBrowserTelemetry(): Promise<void> {
   return setup;
 }
 
-// The web SDK is large and only ever needed in the browser, so it stays out of
-// the main bundle behind dynamic imports.
 async function initialiseBrowserTelemetry() {
   const { metrics } = await import("@opentelemetry/api");
-  const { WebTracerProvider, ConsoleSpanExporter, SimpleSpanProcessor } =
-    await import("@opentelemetry/sdk-trace-web");
-  const { BatchSpanProcessor } = await import("@opentelemetry/sdk-trace-base");
-  const { OTLPTraceExporter } =
-    await import("@opentelemetry/exporter-trace-otlp-http");
-  const { OTLPMetricExporter } =
-    await import("@opentelemetry/exporter-metrics-otlp-http");
-  const { MeterProvider, PeriodicExportingMetricReader } =
-    await import("@opentelemetry/sdk-metrics");
-  const { resourceFromAttributes } = await import("@opentelemetry/resources");
-  const { ATTR_SERVICE_NAME } =
-    await import("@opentelemetry/semantic-conventions");
-  const { ZoneContextManager } = await import("@opentelemetry/context-zone");
-  const { registerInstrumentations } =
-    await import("@opentelemetry/instrumentation");
+  const { logs } = await import("@opentelemetry/api-logs");
   const { getWebAutoInstrumentations } =
     await import("@opentelemetry/auto-instrumentations-web");
+  const { ZoneContextManager } = await import("@opentelemetry/context-zone");
+  const { OTLPLogExporter } =
+    await import("@opentelemetry/exporter-logs-otlp-http");
+  const { OTLPMetricExporter } =
+    await import("@opentelemetry/exporter-metrics-otlp-http");
+  const { OTLPTraceExporter } =
+    await import("@opentelemetry/exporter-trace-otlp-http");
+  const { registerInstrumentations } =
+    await import("@opentelemetry/instrumentation");
+  const { resourceFromAttributes } = await import("@opentelemetry/resources");
+  const {
+    LoggerProvider,
+    BatchLogRecordProcessor,
+    SimpleLogRecordProcessor,
+    ConsoleLogRecordExporter,
+  } = await import("@opentelemetry/sdk-logs");
+  const { MeterProvider, PeriodicExportingMetricReader } =
+    await import("@opentelemetry/sdk-metrics");
+  const { ATTR_SERVICE_NAME } =
+    await import("@opentelemetry/semantic-conventions");
+  const { BatchSpanProcessor } = await import("@opentelemetry/sdk-trace-base");
+  const { WebTracerProvider, ConsoleSpanExporter, SimpleSpanProcessor } =
+    await import("@opentelemetry/sdk-trace-web");
 
   const resource = defaultResource().merge(
     resourceFromAttributes({
@@ -55,7 +64,9 @@ async function initialiseBrowserTelemetry() {
 
   const spanProcessors: SpanProcessor[] = [
     new BatchSpanProcessor(
-      new OTLPTraceExporter({ url: `${origin}/api/otel/v1/traces` }),
+      new OTLPTraceExporter({
+        url: `${origin}/api/otel/v1/traces`,
+      }),
     ),
   ];
   if (env.NODE_ENV === "development") {
@@ -84,6 +95,27 @@ async function initialiseBrowserTelemetry() {
   });
 
   metrics.setGlobalMeterProvider(meterProvider);
+
+  const logProcessors: LogRecordProcessor[] = [
+    new BatchLogRecordProcessor({
+      exporter: new OTLPLogExporter({
+        url: `${origin}/api/otel/v1/logs`,
+      }),
+    }),
+  ];
+  if (env.NODE_ENV === "development") {
+    logProcessors.push(
+      new SimpleLogRecordProcessor({
+        exporter: new ConsoleLogRecordExporter(),
+      }),
+    );
+  }
+
+  const loggerProvider = new LoggerProvider({
+    resource,
+    processors: logProcessors,
+  });
+  logs.setGlobalLoggerProvider(loggerProvider);
 
   // Relative URLs, plus absolute URLs back to this same origin. The origin is
   // escaped because it contains regex metacharacters such as "." and ":".

@@ -26,6 +26,17 @@ export const METRIC_DEMO_RESPONSE_SCHEMA = z.object({
 
 export type MetricDemoResponse = z.infer<typeof METRIC_DEMO_RESPONSE_SCHEMA>;
 
+export const LOG_SCENARIO_SCHEMA = z.enum(["info", "warning", "error"]);
+export type LogScenario = z.infer<typeof LOG_SCENARIO_SCHEMA>;
+
+export const LOG_DEMO_RESPONSE_SCHEMA = z.object({
+  scenario: LOG_SCENARIO_SCHEMA,
+  durationMs: z.number().int().nonnegative(),
+  message: z.string(),
+});
+
+export type LogDemoResponse = z.infer<typeof LOG_DEMO_RESPONSE_SCHEMA>;
+
 export const HEALTH_RESPONSE_SCHEMA = z.object({
   status: z.literal("ok"),
   service: z.string(),
