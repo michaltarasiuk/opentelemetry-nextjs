@@ -1,3 +1,4 @@
+import { defaultResource } from "@opentelemetry/resources";
 import { SpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 import { env } from "@/env";
@@ -44,9 +45,11 @@ async function initialiseBrowserTelemetry() {
   const { getWebAutoInstrumentations } =
     await import("@opentelemetry/auto-instrumentations-web");
 
-  const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: env.NEXT_PUBLIC_OTEL_SERVICE_NAME,
-  });
+  const resource = defaultResource().merge(
+    resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: env.NEXT_PUBLIC_OTEL_SERVICE_NAME,
+    }),
+  );
 
   const { origin } = window.location;
 
