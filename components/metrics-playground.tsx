@@ -24,6 +24,7 @@ import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runMetricsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
 import { METRIC_SCENARIO_SCHEMA } from "@/lib/schemas";
+import { withMinimumDelay } from "@/lib/sleep";
 
 const META: DemoPlaygroundMeta = {
   title: "Metrics playground",
@@ -65,7 +66,7 @@ async function reduceMetricsRun(
   const { totals } = previous;
 
   try {
-    const result = await runMetricsDemoAction(scenario);
+    const result = await withMinimumDelay(runMetricsDemoAction(scenario));
     toast.success(`Metrics recorded in ${result.durationMs}ms`);
     return {
       result,

@@ -1,57 +1,52 @@
 "use client";
 
-import {
-  startTransition,
-  useActionState,
-  useState,
-  type ReactNode,
-} from "react";
+import { startTransition, useActionState, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import type { DemoPlaygroundMeta } from "@/components/demo-playground";
-import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
+import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
 
 import { DemoPlayground } from "@/components/demo-playground";
 import { FieldDescription } from "@/components/ui/field";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { runTraceDemoAction } from "@/lib/actions";
+import { runLogsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
-import { TRACE_SCENARIO_SCHEMA } from "@/lib/schemas";
+import { LOG_SCENARIO_SCHEMA } from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
 
 const META: DemoPlaygroundMeta = {
-  title: "Trace playground",
+  title: "Logs playground",
   description:
-    "Trigger scenarios from the browser to generate linked client and server spans.",
-  runLabel: "Run trace",
-  runningLabel: "Running…",
-  errorTitle: "Trace failed",
+    "Emit structured log records at various severity levels to your collector.",
+  runLabel: "Emit logs",
+  runningLabel: "Emitting…",
+  errorTitle: "Log emission failed",
 };
 
-interface TraceRunState {
-  result: TraceDemoResponse | null;
+interface LogsRunState {
+  result: LogDemoResponse | null;
   error: string | null;
 }
 
-const INITIAL_RUN_STATE: TraceRunState = {
+const INITIAL_RUN_STATE: LogsRunState = {
   result: null,
   error: null,
 };
 
-async function reduceTraceRun(
-  _previous: TraceRunState,
-  scenario: TraceScenario,
-): Promise<TraceRunState> {
+async function reduceLogsRun(
+  _previous: LogsRunState,
+  scenario: LogScenario,
+): Promise<LogsRunState> {
   try {
-    const result = await withMinimumDelay(runTraceDemoAction(scenario));
-    toast.success(`Trace completed in ${result.durationMs}ms`);
+    const result = await withMinimumDelay(runLogsDemoAction(scenario));
+    toast.success(`Logs emitted in ${result.durationMs}ms`);
     return {
       result,
       error: null,
     };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Trace demo request failed";
+      error instanceof Error ? error.message : "Logs demo request failed";
     toast.error(message);
     return {
       result: null,
@@ -60,22 +55,22 @@ async function reduceTraceRun(
   }
 }
 
-function TracePlaygroundProvider({ children }: { children: ReactNode }) {
-  const [scenario, setScenario] = useState<TraceScenario>("fast");
+function LogsPlaygroundProvider({ children }: { children: ReactNode }) {
+  const [scenario, setScenario] = useState<LogScenario>("info");
   const [runState, dispatchRun, pending] = useActionState(
-    reduceTraceRun,
+    reduceLogsRun,
     INITIAL_RUN_STATE,
   );
 
   function selectScenario(value: string) {
-    const parsed = TRACE_SCENARIO_SCHEMA.safeParse(value);
+    const parsed = LOG_SCENARIO_SCHEMA.safeParse(value);
     if (parsed.success) {
       setScenario(parsed.data);
     }
   }
 
   function run() {
-    recordBrowserClick("trace-playground.run");
+    recordBrowserClick("logs-playground.run");
     startTransition(() => dispatchRun(scenario));
   }
 
@@ -95,42 +90,42 @@ function TracePlaygroundProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function TraceScenarioTabs() {
+function LogsScenarioTabs() {
   return (
     <>
       <TabsList>
-        <TabsTrigger value="fast">Fast</TabsTrigger>
-        <TabsTrigger value="slow">Slow</TabsTrigger>
+        <TabsTrigger value="info">Info</TabsTrigger>
+        <TabsTrigger value="warning">Warning</TabsTrigger>
         <TabsTrigger value="error">Error</TabsTrigger>
       </TabsList>
-      <TabsContent value="fast">
+      <TabsContent value="info">
         <FieldDescription>
-          Cache hit with short delays across validateRequest, cacheLookup, and
-          buildResponse.
+          Emits a DEBUG record followed by an INFO record with structured
+          attributes.
         </FieldDescription>
       </TabsContent>
-      <TabsContent value="slow">
+      <TabsContent value="warning">
         <FieldDescription>
-          Cache miss with a simulated DB query. Compare latency in your
-          collector.
+          Emits a WARN record with cache-miss context and fallback strategy
+          attributes.
         </FieldDescription>
       </TabsContent>
       <TabsContent value="error">
         <FieldDescription>
-          Fails inside dbQuery, returning HTTP 500 with a failed span status.
+          Emits an ERROR record with exception type and message attributes.
         </FieldDescription>
       </TabsContent>
     </>
   );
 }
 
-function TracePlaygroundFrame() {
+function LogsPlaygroundFrame() {
   return (
     <DemoPlayground.Frame>
       <DemoPlayground.Header />
       <DemoPlayground.Content>
         <DemoPlayground.ScenarioField>
-          <TraceScenarioTabs />
+          <LogsScenarioTabs />
         </DemoPlayground.ScenarioField>
       </DemoPlayground.Content>
       <DemoPlayground.Actions />
@@ -138,10 +133,10 @@ function TracePlaygroundFrame() {
   );
 }
 
-export function TracePlayground() {
+export function LogsPlayground() {
   return (
-    <TracePlaygroundProvider>
-      <TracePlaygroundFrame />
-    </TracePlaygroundProvider>
+    <LogsPlaygroundProvider>
+      <LogsPlaygroundFrame />
+    </LogsPlaygroundProvider>
   );
 }
