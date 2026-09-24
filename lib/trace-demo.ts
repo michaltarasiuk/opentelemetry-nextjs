@@ -1,10 +1,11 @@
-import { metrics, SpanStatusCode, trace, type Span } from "@opentelemetry/api";
+import { metrics, trace } from "@opentelemetry/api";
+import { wrapTracer } from "@opentelemetry/api/experimental";
 
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
 import { sleep } from "@/lib/sleep";
 
-const tracer = trace.getTracer("opentelemetry-nextjs");
+const tracer = wrapTracer(trace.getTracer("opentelemetry-nextjs"));
 const meter = metrics.getMeter("opentelemetry-nextjs");
 
 const traceDemoCounter = meter.createCounter("demo.trace.runs", {
@@ -12,36 +13,15 @@ const traceDemoCounter = meter.createCounter("demo.trace.runs", {
   unit: "1",
 });
 
-async function withSpan<T>(name: string, fn: (span: Span) => Promise<T>) {
-  return tracer.startActiveSpan(name, async (span) => {
-    try {
-      return await fn(span);
-    } catch (error) {
-      let message: string | undefined;
-      if (error instanceof Error) {
-        span.recordException(error);
-        message = error.message;
-      }
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message,
-      });
-      throw error;
-    } finally {
-      span.end();
-    }
-  });
-}
-
 function validateRequest(scenario: TraceScenario) {
-  return withSpan("validateRequest", async (span) => {
+  return tracer.withActiveSpan("validateRequest", async (span) => {
     span.setAttribute("demo.scenario", scenario);
     await sleep(10);
   });
 }
 
 function cacheLookup(scenario: TraceScenario) {
-  return withSpan("cacheLookup", async (span) => {
+  return tracer.withActiveSpan("cacheLookup", async (span) => {
     const cacheHit = scenario === "fast";
     span.setAttribute("cache.hit", cacheHit);
     await sleep(cacheHit ? 15 : 40);
@@ -50,7 +30,7 @@ function cacheLookup(scenario: TraceScenario) {
 }
 
 function dbQuery(scenario: TraceScenario) {
-  return withSpan("dbQuery", async (span) => {
+  return tracer.withActiveSpan("dbQuery", async (span) => {
     await sleep(scenario === "fast" ? 20 : 700);
 
     if (scenario === "error") {
@@ -68,7 +48,7 @@ function buildResponse(
   cacheHit: boolean,
   rows: number | null,
 ) {
-  return withSpan("buildResponse", async (span) => {
+  return tracer.withActiveSpan("buildResponse", async (span) => {
     await sleep(20);
     span.setAttribute("demo.scenario", scenario);
     span.setAttribute("cache.hit", cacheHit);
@@ -81,7 +61,7 @@ function buildResponse(
 export function runTraceDemo(
   scenario: TraceScenario,
 ): Promise<TraceDemoResponse> {
-  return withSpan("runTraceDemo", async (span) => {
+  return tracer.withActiveSpan("runTraceDemo", async (span) => {
     const startedAt = Date.now();
 
     span.setAttribute("demo.scenario", scenario);
