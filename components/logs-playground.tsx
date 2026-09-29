@@ -8,7 +8,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { DemoPlaygroundMeta } from "@/components/demo-playground";
 import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
 
 import { DemoPlayground } from "@/components/demo-playground";
@@ -18,15 +17,6 @@ import { runLogsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
 import { LOG_SCENARIO_SCHEMA } from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
-
-const META: DemoPlaygroundMeta = {
-  title: "Logs playground",
-  description:
-    "Emit structured log records at various severity levels to your collector.",
-  runLabel: "Emit logs",
-  runningLabel: "Emitting…",
-  errorTitle: "Log emission failed",
-};
 
 interface LogsRunState {
   result: LogDemoResponse | null;
@@ -88,7 +78,6 @@ function LogsPlaygroundProvider({ children }: { children: ReactNode }) {
         error: runState.error,
       }}
       actions={{ setScenario: selectScenario, run }}
-      meta={META}
     >
       {children}
     </DemoPlayground.Provider>
@@ -127,13 +116,24 @@ function LogsScenarioTabs() {
 function LogsPlaygroundFrame() {
   return (
     <DemoPlayground.Frame>
-      <DemoPlayground.Header />
+      <DemoPlayground.Header
+        title="Logs playground"
+        description="Emit structured log records at various severity levels to your collector."
+      />
       <DemoPlayground.Content>
         <DemoPlayground.ScenarioField>
           <LogsScenarioTabs />
         </DemoPlayground.ScenarioField>
       </DemoPlayground.Content>
-      <DemoPlayground.Actions />
+      <DemoPlayground.Actions>
+        <DemoPlayground.RunButton pendingLabel="Emitting…">
+          Emit logs
+        </DemoPlayground.RunButton>
+        <DemoPlayground.Response>
+          <DemoPlayground.ErrorAlert title="Log emission failed" />
+          <DemoPlayground.Result pendingLabel="Emitting…" />
+        </DemoPlayground.Response>
+      </DemoPlayground.Actions>
     </DemoPlayground.Frame>
   );
 }

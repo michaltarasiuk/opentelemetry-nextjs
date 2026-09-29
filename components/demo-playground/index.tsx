@@ -42,10 +42,9 @@ function Provider({
   children,
   state,
   actions,
-  meta,
 }: DemoPlaygroundContextValue & { children: ReactNode }) {
   return (
-    <DemoPlaygroundContext value={{ state, actions, meta }}>
+    <DemoPlaygroundContext value={{ state, actions }}>
       {children}
     </DemoPlaygroundContext>
   );
@@ -55,13 +54,17 @@ function Frame({ children }: { children: ReactNode }) {
   return <Card>{children}</Card>;
 }
 
-function Header() {
-  const { meta } = useDemoPlayground();
-
+function Header({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <CardHeader>
-      <CardTitle>{meta.title}</CardTitle>
-      <CardDescription>{meta.description}</CardDescription>
+      <CardTitle>{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
     </CardHeader>
   );
 }
@@ -89,38 +92,42 @@ function ScenarioField({ children }: { children: ReactNode }) {
   );
 }
 
-function Actions({ children }: { children?: ReactNode }) {
+function Actions({ children }: { children: ReactNode }) {
   return (
     <CardFooter className="flex-col items-stretch gap-4 border-t">
-      <RunButton />
       {children}
-      <Response />
     </CardFooter>
   );
 }
 
-function RunButton() {
-  const { state, actions, meta } = useDemoPlayground();
+function RunButton({
+  children,
+  pendingLabel,
+}: {
+  children: ReactNode;
+  pendingLabel: string;
+}) {
+  const { state, actions } = useDemoPlayground();
 
   return (
     <Button onClick={actions.run} disabled={state.pending}>
       {state.pending ? (
         <>
           <Spinner className="size-4" />
-          {meta.runningLabel}
+          {pendingLabel}
         </>
       ) : (
         <>
           <PlayIcon className="size-4" />
-          {meta.runLabel}
+          {children}
         </>
       )}
     </Button>
   );
 }
 
-function Response() {
-  const { state, meta } = useDemoPlayground();
+function Response({ children }: { children: ReactNode }) {
+  const { state } = useDemoPlayground();
 
   if (!state.pending && !state.result && !state.error) {
     return null;
@@ -131,29 +138,43 @@ function Response() {
       <Separator />
       <Field>
         <FieldTitle>Response</FieldTitle>
-        <FieldContent>
-          <div>
-            {state.error ? (
-              <Alert variant="destructive">
-                <CircleAlertIcon />
-                <AlertTitle>{meta.errorTitle}</AlertTitle>
-                <AlertDescription>{state.error}</AlertDescription>
-              </Alert>
-            ) : (
-              <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
-                {state.result ? (
-                  JSON.stringify(state.result, null, 2)
-                ) : (
-                  <span className="text-muted-foreground">
-                    {meta.runningLabel}
-                  </span>
-                )}
-              </pre>
-            )}
-          </div>
-        </FieldContent>
+        <FieldContent>{children}</FieldContent>
       </Field>
     </>
+  );
+}
+
+function ErrorAlert({ title }: { title: string }) {
+  const { state } = useDemoPlayground();
+
+  if (!state.error) {
+    return null;
+  }
+
+  return (
+    <Alert variant="destructive">
+      <CircleAlertIcon />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>{state.error}</AlertDescription>
+    </Alert>
+  );
+}
+
+function Result({ pendingLabel }: { pendingLabel: string }) {
+  const { state } = useDemoPlayground();
+
+  if (state.error) {
+    return null;
+  }
+
+  return (
+    <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
+      {state.result ? (
+        JSON.stringify(state.result, null, 2)
+      ) : (
+        <span className="text-muted-foreground">{pendingLabel}</span>
+      )}
+    </pre>
   );
 }
 
@@ -166,10 +187,8 @@ export const DemoPlayground = {
   Actions,
   RunButton,
   Response,
+  ErrorAlert,
+  Result,
 };
 
-export type {
-  DemoPlaygroundActions,
-  DemoPlaygroundMeta,
-  DemoPlaygroundState,
-} from "./context";
+export type { DemoPlaygroundActions, DemoPlaygroundState } from "./context";

@@ -14,18 +14,9 @@ export interface DemoPlaygroundActions {
   run: () => void;
 }
 
-export interface DemoPlaygroundMeta {
-  title: string;
-  description: string;
-  runLabel: string;
-  runningLabel: string;
-  errorTitle: string;
-}
-
 export interface DemoPlaygroundContextValue {
   state: DemoPlaygroundState;
   actions: DemoPlaygroundActions;
-  meta: DemoPlaygroundMeta;
 }
 
 export const DemoPlaygroundContext =

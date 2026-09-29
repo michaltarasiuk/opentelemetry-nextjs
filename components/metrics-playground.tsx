@@ -10,7 +10,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { DemoPlaygroundMeta } from "@/components/demo-playground";
 import type { MetricDemoResponse, MetricScenario } from "@/lib/schemas";
 
 import { DemoPlayground } from "@/components/demo-playground";
@@ -25,15 +24,6 @@ import { runMetricsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
 import { METRIC_SCENARIO_SCHEMA } from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
-
-const META: DemoPlaygroundMeta = {
-  title: "Metrics playground",
-  description:
-    "Emit server counters and histograms, plus a browser click counter, to your collector.",
-  runLabel: "Record metrics",
-  runningLabel: "Recording…",
-  errorTitle: "Metrics run failed",
-};
 
 interface SessionTotals {
   runs: number;
@@ -120,7 +110,6 @@ function MetricsPlaygroundProvider({ children }: { children: ReactNode }) {
         error: runState.error,
       }}
       actions={{ setScenario: selectScenario, run }}
-      meta={META}
     >
       <MetricsSessionContext value={runState.totals}>
         {children}
@@ -198,14 +187,25 @@ function MetricsSessionTotals() {
 function MetricsPlaygroundFrame() {
   return (
     <DemoPlayground.Frame>
-      <DemoPlayground.Header />
+      <DemoPlayground.Header
+        title="Metrics playground"
+        description="Emit server counters and histograms, plus a browser click counter, to your collector."
+      />
       <DemoPlayground.Content>
         <DemoPlayground.ScenarioField>
           <MetricsScenarioTabs />
         </DemoPlayground.ScenarioField>
         <MetricsSessionTotals />
       </DemoPlayground.Content>
-      <DemoPlayground.Actions />
+      <DemoPlayground.Actions>
+        <DemoPlayground.RunButton pendingLabel="Recording…">
+          Record metrics
+        </DemoPlayground.RunButton>
+        <DemoPlayground.Response>
+          <DemoPlayground.ErrorAlert title="Metrics run failed" />
+          <DemoPlayground.Result pendingLabel="Recording…" />
+        </DemoPlayground.Response>
+      </DemoPlayground.Actions>
     </DemoPlayground.Frame>
   );
 }

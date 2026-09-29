@@ -8,7 +8,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { DemoPlaygroundMeta } from "@/components/demo-playground";
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
 import { DemoPlayground } from "@/components/demo-playground";
@@ -18,15 +17,6 @@ import { runTraceDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
 import { TRACE_SCENARIO_SCHEMA } from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
-
-const META: DemoPlaygroundMeta = {
-  title: "Trace playground",
-  description:
-    "Trigger scenarios from the browser to generate linked client and server spans.",
-  runLabel: "Run trace",
-  runningLabel: "Running…",
-  errorTitle: "Trace failed",
-};
 
 interface TraceRunState {
   result: TraceDemoResponse | null;
@@ -88,7 +78,6 @@ function TracePlaygroundProvider({ children }: { children: ReactNode }) {
         error: runState.error,
       }}
       actions={{ setScenario: selectScenario, run }}
-      meta={META}
     >
       {children}
     </DemoPlayground.Provider>
@@ -127,13 +116,24 @@ function TraceScenarioTabs() {
 function TracePlaygroundFrame() {
   return (
     <DemoPlayground.Frame>
-      <DemoPlayground.Header />
+      <DemoPlayground.Header
+        title="Trace playground"
+        description="Trigger scenarios from the browser to generate linked client and server spans."
+      />
       <DemoPlayground.Content>
         <DemoPlayground.ScenarioField>
           <TraceScenarioTabs />
         </DemoPlayground.ScenarioField>
       </DemoPlayground.Content>
-      <DemoPlayground.Actions />
+      <DemoPlayground.Actions>
+        <DemoPlayground.RunButton pendingLabel="Running…">
+          Run trace
+        </DemoPlayground.RunButton>
+        <DemoPlayground.Response>
+          <DemoPlayground.ErrorAlert title="Trace failed" />
+          <DemoPlayground.Result pendingLabel="Running…" />
+        </DemoPlayground.Response>
+      </DemoPlayground.Actions>
     </DemoPlayground.Frame>
   );
 }
