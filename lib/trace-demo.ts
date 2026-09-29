@@ -2,6 +2,7 @@ import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
 import { sleep } from "@/lib/sleep";
 import { getMeter, getTracer } from "@/lib/telemetry";
+import { isDefined } from "@/lib/utils";
 
 const tracer = getTracer();
 const meter = getMeter();
@@ -59,7 +60,7 @@ function buildResponse(
       attributes: {
         "demo.scenario": scenario,
         "cache.hit": cacheHit,
-        ...(rows !== null ? { "db.rows": rows } : {}),
+        ...(isDefined(rows) ? { "db.rows": rows } : {}),
       },
     },
     async () => {

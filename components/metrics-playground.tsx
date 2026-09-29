@@ -24,6 +24,7 @@ import { runMetricsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
 import { METRIC_SCENARIO_SCHEMA } from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
+import { isDefined } from "@/lib/utils";
 
 interface SessionTotals {
   runs: number;
@@ -150,7 +151,7 @@ function MetricsScenarioTabs() {
 
 function MetricsSessionTotals() {
   const totals = use(MetricsSessionContext);
-  if (!totals) {
+  if (!isDefined(totals)) {
     throw new Error(
       "MetricsSessionTotals must be used within MetricsPlaygroundProvider",
     );

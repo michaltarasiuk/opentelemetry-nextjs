@@ -23,11 +23,13 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs } from "@/components/ui/tabs";
 
+import { isDefined } from "@/lib/utils";
+
 import { PlaygroundContext, type PlaygroundContextValue } from "./context";
 
 export function usePlayground() {
   const value = use(PlaygroundContext);
-  if (!value) {
+  if (!isDefined(value)) {
     throw new Error(
       "Playground components must be used within Playground.Provider",
     );
@@ -124,7 +126,7 @@ function RunButton({
 function Response({ children }: { children: ReactNode }) {
   const { state } = usePlayground();
 
-  if (!state.pending && !state.result && !state.error) {
+  if (!state.pending && !isDefined(state.result) && !isDefined(state.error)) {
     return null;
   }
 
@@ -142,7 +144,7 @@ function Response({ children }: { children: ReactNode }) {
 function ErrorAlert({ title }: { title: string }) {
   const { state } = usePlayground();
 
-  if (!state.error) {
+  if (!isDefined(state.error)) {
     return null;
   }
 
@@ -164,7 +166,7 @@ function Result({ pendingLabel }: { pendingLabel: string }) {
 
   return (
     <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
-      {state.result ? (
+      {isDefined(state.result) ? (
         JSON.stringify(state.result, null, 2)
       ) : (
         <span className="text-muted-foreground">{pendingLabel}</span>

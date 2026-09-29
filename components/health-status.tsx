@@ -6,7 +6,7 @@ import type { HealthResponse } from "@/lib/schemas";
 
 import { Spinner } from "@/components/ui/spinner";
 import { HEALTH_RESPONSE_SCHEMA } from "@/lib/schemas";
-import { cn } from "@/lib/utils";
+import { cn, isDefined } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -65,10 +65,10 @@ export function HealthStatus() {
         <span
           className={cn(
             "capitalize tabular-nums",
-            !health && "text-destructive",
+            !isDefined(health) && "text-destructive",
           )}
         >
-          {health ? health.status : "Degraded"}
+          {isDefined(health) ? health.status : "Degraded"}
         </span>
       )}
     </span>

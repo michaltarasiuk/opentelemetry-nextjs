@@ -2,6 +2,7 @@ import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import { env } from "@/env";
 import { getLogger } from "@/lib/telemetry";
+import { isDefined } from "@/lib/utils";
 
 const logger = getLogger();
 
@@ -43,7 +44,7 @@ export async function POST(
   }
 
   const contentType = request.headers.get("content-type");
-  if (contentType) {
+  if (isDefined(contentType)) {
     headers.set("content-type", contentType);
   }
 
@@ -57,7 +58,7 @@ export async function POST(
   // content-encoding and content-length no longer describe this response.
   const responseHeaders = new Headers({ "cache-control": "no-store" });
   const responseContentType = response.headers.get("content-type");
-  if (responseContentType) {
+  if (isDefined(responseContentType)) {
     responseHeaders.set("content-type", responseContentType);
   }
 
