@@ -105,10 +105,11 @@ function RunButton({
   pendingLabel: string;
 }) {
   const { state, actions } = usePlayground();
+  const { execution } = state;
 
   return (
-    <Button onClick={actions.run} disabled={state.pending}>
-      {state.pending ? (
+    <Button onClick={actions.run} disabled={execution.pending}>
+      {execution.pending ? (
         <>
           <Spinner className="size-4" />
           {pendingLabel}
@@ -125,8 +126,13 @@ function RunButton({
 
 function Response({ children }: { children: ReactNode }) {
   const { state } = usePlayground();
+  const { execution } = state;
 
-  if (!state.pending && !isDefined(state.result) && !isDefined(state.error)) {
+  if (
+    !execution.pending &&
+    !isDefined(execution.result) &&
+    !isDefined(execution.error)
+  ) {
     return null;
   }
 
@@ -144,7 +150,7 @@ function Response({ children }: { children: ReactNode }) {
 function ErrorAlert({ title }: { title: string }) {
   const { state } = usePlayground();
 
-  if (!isDefined(state.error)) {
+  if (!isDefined(state.execution.error)) {
     return null;
   }
 
@@ -152,22 +158,23 @@ function ErrorAlert({ title }: { title: string }) {
     <Alert variant="destructive">
       <CircleAlertIcon />
       <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{state.error}</AlertDescription>
+      <AlertDescription>{state.execution.error}</AlertDescription>
     </Alert>
   );
 }
 
 function Result({ pendingLabel }: { pendingLabel: string }) {
   const { state } = usePlayground();
+  const { execution } = state;
 
-  if (state.error) {
+  if (execution.error) {
     return null;
   }
 
   return (
     <pre className="max-h-48 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-relaxed">
-      {isDefined(state.result) ? (
-        JSON.stringify(state.result, null, 2)
+      {isDefined(execution.result) ? (
+        JSON.stringify(execution.result, null, 2)
       ) : (
         <span className="text-muted-foreground">{pendingLabel}</span>
       )}
@@ -188,4 +195,9 @@ export const Playground = {
   Result,
 };
 
-export type { PlaygroundActions, PlaygroundState } from "./context";
+export type {
+  PlaygroundActions,
+  PlaygroundContextValue,
+  PlaygroundExecution,
+  PlaygroundState,
+} from "./context";

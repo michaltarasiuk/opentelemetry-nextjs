@@ -73,9 +73,11 @@ function TracePlaygroundProvider({ children }: { children: ReactNode }) {
     <Playground.Provider
       state={{
         scenario,
-        pending,
-        result: runState.result,
-        error: runState.error,
+        execution: {
+          pending,
+          result: runState.result,
+          error: runState.error,
+        },
       }}
       actions={{ setScenario: selectScenario, run }}
     >
