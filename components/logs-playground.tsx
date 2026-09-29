@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
 
-import { DemoPlayground } from "@/components/demo-playground";
+import { Playground } from "@/components/playground";
 import { FieldDescription } from "@/components/ui/field";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runLogsDemoAction } from "@/lib/actions";
@@ -65,7 +65,7 @@ export function LogsPlayground() {
   }
 
   return (
-    <DemoPlayground.Provider
+    <Playground.Provider
       state={{
         scenario,
         pending,
@@ -74,13 +74,13 @@ export function LogsPlayground() {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      <DemoPlayground.Frame>
-        <DemoPlayground.Header
+      <Playground.Frame>
+        <Playground.Header
           title="Logs playground"
           description="Emit structured log records at various severity levels to your collector."
         />
-        <DemoPlayground.Content>
-          <DemoPlayground.ScenarioField>
+        <Playground.Content>
+          <Playground.ScenarioField>
             <TabsList>
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="warning">Warning</TabsTrigger>
@@ -104,18 +104,18 @@ export function LogsPlayground() {
                 attributes.
               </FieldDescription>
             </TabsContent>
-          </DemoPlayground.ScenarioField>
-        </DemoPlayground.Content>
-        <DemoPlayground.Actions>
-          <DemoPlayground.RunButton pendingLabel="Emitting…">
+          </Playground.ScenarioField>
+        </Playground.Content>
+        <Playground.Actions>
+          <Playground.RunButton pendingLabel="Emitting…">
             Emit logs
-          </DemoPlayground.RunButton>
-          <DemoPlayground.Response>
-            <DemoPlayground.ErrorAlert title="Log emission failed" />
-            <DemoPlayground.Result pendingLabel="Emitting…" />
-          </DemoPlayground.Response>
-        </DemoPlayground.Actions>
-      </DemoPlayground.Frame>
-    </DemoPlayground.Provider>
+          </Playground.RunButton>
+          <Playground.Response>
+            <Playground.ErrorAlert title="Log emission failed" />
+            <Playground.Result pendingLabel="Emitting…" />
+          </Playground.Response>
+        </Playground.Actions>
+      </Playground.Frame>
+    </Playground.Provider>
   );
 }

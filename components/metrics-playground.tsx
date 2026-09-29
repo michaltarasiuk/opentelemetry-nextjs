@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import type { MetricDemoResponse, MetricScenario } from "@/lib/schemas";
 
-import { DemoPlayground } from "@/components/demo-playground";
+import { Playground } from "@/components/playground";
 import {
   Field,
   FieldContent,
@@ -95,7 +95,7 @@ export function MetricsPlayground() {
   const { totals } = runState;
 
   return (
-    <DemoPlayground.Provider
+    <Playground.Provider
       state={{
         scenario,
         pending,
@@ -104,13 +104,13 @@ export function MetricsPlayground() {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      <DemoPlayground.Frame>
-        <DemoPlayground.Header
+      <Playground.Frame>
+        <Playground.Header
           title="Metrics playground"
           description="Emit server counters and histograms, plus a browser click counter, to your collector."
         />
-        <DemoPlayground.Content>
-          <DemoPlayground.ScenarioField>
+        <Playground.Content>
+          <Playground.ScenarioField>
             <TabsList>
               <TabsTrigger value="increment">Increment</TabsTrigger>
               <TabsTrigger value="batch">Batch</TabsTrigger>
@@ -134,7 +134,7 @@ export function MetricsPlayground() {
                 with successful runs.
               </FieldDescription>
             </TabsContent>
-          </DemoPlayground.ScenarioField>
+          </Playground.ScenarioField>
           <Field>
             <FieldTitle>Session totals</FieldTitle>
             <FieldContent>
@@ -161,17 +161,17 @@ export function MetricsPlayground() {
               </FieldDescription>
             </FieldContent>
           </Field>
-        </DemoPlayground.Content>
-        <DemoPlayground.Actions>
-          <DemoPlayground.RunButton pendingLabel="Recording…">
+        </Playground.Content>
+        <Playground.Actions>
+          <Playground.RunButton pendingLabel="Recording…">
             Record metrics
-          </DemoPlayground.RunButton>
-          <DemoPlayground.Response>
-            <DemoPlayground.ErrorAlert title="Metrics run failed" />
-            <DemoPlayground.Result pendingLabel="Recording…" />
-          </DemoPlayground.Response>
-        </DemoPlayground.Actions>
-      </DemoPlayground.Frame>
-    </DemoPlayground.Provider>
+          </Playground.RunButton>
+          <Playground.Response>
+            <Playground.ErrorAlert title="Metrics run failed" />
+            <Playground.Result pendingLabel="Recording…" />
+          </Playground.Response>
+        </Playground.Actions>
+      </Playground.Frame>
+    </Playground.Provider>
   );
 }

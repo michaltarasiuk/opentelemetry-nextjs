@@ -23,16 +23,13 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs } from "@/components/ui/tabs";
 
-import {
-  DemoPlaygroundContext,
-  type DemoPlaygroundContextValue,
-} from "./context";
+import { PlaygroundContext, type PlaygroundContextValue } from "./context";
 
-export function useDemoPlayground() {
-  const value = use(DemoPlaygroundContext);
+export function usePlayground() {
+  const value = use(PlaygroundContext);
   if (!value) {
     throw new Error(
-      "DemoPlayground components must be used within DemoPlayground.Provider",
+      "Playground components must be used within Playground.Provider",
     );
   }
   return value;
@@ -42,11 +39,9 @@ function Provider({
   children,
   state,
   actions,
-}: DemoPlaygroundContextValue & { children: ReactNode }) {
+}: PlaygroundContextValue & { children: ReactNode }) {
   return (
-    <DemoPlaygroundContext value={{ state, actions }}>
-      {children}
-    </DemoPlaygroundContext>
+    <PlaygroundContext value={{ state, actions }}>{children}</PlaygroundContext>
   );
 }
 
@@ -78,7 +73,7 @@ function Content({ children }: { children: ReactNode }) {
 }
 
 function ScenarioField({ children }: { children: ReactNode }) {
-  const { state, actions } = useDemoPlayground();
+  const { state, actions } = usePlayground();
 
   return (
     <Field>
@@ -107,7 +102,7 @@ function RunButton({
   children: ReactNode;
   pendingLabel: string;
 }) {
-  const { state, actions } = useDemoPlayground();
+  const { state, actions } = usePlayground();
 
   return (
     <Button onClick={actions.run} disabled={state.pending}>
@@ -127,7 +122,7 @@ function RunButton({
 }
 
 function Response({ children }: { children: ReactNode }) {
-  const { state } = useDemoPlayground();
+  const { state } = usePlayground();
 
   if (!state.pending && !state.result && !state.error) {
     return null;
@@ -145,7 +140,7 @@ function Response({ children }: { children: ReactNode }) {
 }
 
 function ErrorAlert({ title }: { title: string }) {
-  const { state } = useDemoPlayground();
+  const { state } = usePlayground();
 
   if (!state.error) {
     return null;
@@ -161,7 +156,7 @@ function ErrorAlert({ title }: { title: string }) {
 }
 
 function Result({ pendingLabel }: { pendingLabel: string }) {
-  const { state } = useDemoPlayground();
+  const { state } = usePlayground();
 
   if (state.error) {
     return null;
@@ -178,7 +173,7 @@ function Result({ pendingLabel }: { pendingLabel: string }) {
   );
 }
 
-export const DemoPlayground = {
+export const Playground = {
   Provider,
   Frame,
   Header,
@@ -191,4 +186,4 @@ export const DemoPlayground = {
   Result,
 };
 
-export type { DemoPlaygroundActions, DemoPlaygroundState } from "./context";
+export type { PlaygroundActions, PlaygroundState } from "./context";

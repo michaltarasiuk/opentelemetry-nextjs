@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
-import { DemoPlayground } from "@/components/demo-playground";
+import { Playground } from "@/components/playground";
 import { FieldDescription } from "@/components/ui/field";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runTraceDemoAction } from "@/lib/actions";
@@ -65,7 +65,7 @@ export function TracePlayground() {
   }
 
   return (
-    <DemoPlayground.Provider
+    <Playground.Provider
       state={{
         scenario,
         pending,
@@ -74,13 +74,13 @@ export function TracePlayground() {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      <DemoPlayground.Frame>
-        <DemoPlayground.Header
+      <Playground.Frame>
+        <Playground.Header
           title="Trace playground"
           description="Trigger scenarios from the browser to generate linked client and server spans."
         />
-        <DemoPlayground.Content>
-          <DemoPlayground.ScenarioField>
+        <Playground.Content>
+          <Playground.ScenarioField>
             <TabsList>
               <TabsTrigger value="fast">Fast</TabsTrigger>
               <TabsTrigger value="slow">Slow</TabsTrigger>
@@ -104,18 +104,18 @@ export function TracePlayground() {
                 status.
               </FieldDescription>
             </TabsContent>
-          </DemoPlayground.ScenarioField>
-        </DemoPlayground.Content>
-        <DemoPlayground.Actions>
-          <DemoPlayground.RunButton pendingLabel="Running…">
+          </Playground.ScenarioField>
+        </Playground.Content>
+        <Playground.Actions>
+          <Playground.RunButton pendingLabel="Running…">
             Run trace
-          </DemoPlayground.RunButton>
-          <DemoPlayground.Response>
-            <DemoPlayground.ErrorAlert title="Trace failed" />
-            <DemoPlayground.Result pendingLabel="Running…" />
-          </DemoPlayground.Response>
-        </DemoPlayground.Actions>
-      </DemoPlayground.Frame>
-    </DemoPlayground.Provider>
+          </Playground.RunButton>
+          <Playground.Response>
+            <Playground.ErrorAlert title="Trace failed" />
+            <Playground.Result pendingLabel="Running…" />
+          </Playground.Response>
+        </Playground.Actions>
+      </Playground.Frame>
+    </Playground.Provider>
   );
 }
