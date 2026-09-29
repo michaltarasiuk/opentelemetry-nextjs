@@ -1,12 +1,12 @@
 import { metrics, type Counter } from "@opentelemetry/api";
 
-const METER_NAME = "opentelemetry-nextjs-web";
+import { env } from "@/env";
 
 let clickCounter: Counter | null = null;
 let routeChangeCounter: Counter | null = null;
 
 function getBrowserMeter() {
-  return metrics.getMeter(METER_NAME);
+  return metrics.getMeter(env.NEXT_PUBLIC_OTEL_SERVICE_NAME);
 }
 
 export function recordBrowserClick(target: string) {

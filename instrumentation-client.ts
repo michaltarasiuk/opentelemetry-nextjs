@@ -1,5 +1,6 @@
 import { trace } from "@opentelemetry/api";
 
+import { env } from "./env";
 import { recordRouteChange } from "./lib/metrics.client";
 import { setupBrowserTelemetry } from "./lib/telemetry.client";
 
@@ -14,7 +15,7 @@ export function onRouterTransitionStart(
   recordRouteChange(navigationType);
 
   trace
-    .getTracer("opentelemetry-nextjs-router")
+    .getTracer(`${env.NEXT_PUBLIC_OTEL_SERVICE_NAME}-router`)
     .startActiveSpan("route.change", (span) => {
       span.setAttribute("route.url", url);
       span.setAttribute("route.type", navigationType);

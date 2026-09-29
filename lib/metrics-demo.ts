@@ -1,10 +1,9 @@
-import { metrics } from "@opentelemetry/api";
-
 import type { MetricDemoResponse, MetricScenario } from "@/lib/schemas";
 
 import { sleep } from "@/lib/sleep";
+import { getMeter } from "@/lib/telemetry";
 
-const meter = metrics.getMeter("opentelemetry-nextjs");
+const meter = getMeter();
 
 const requestCounter = meter.createCounter("demo.requests", {
   description: "Number of demo metric requests recorded",

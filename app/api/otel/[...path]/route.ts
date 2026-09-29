@@ -1,8 +1,9 @@
-import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import { env } from "@/env";
+import { getLogger } from "@/lib/telemetry";
 
-const logger = logs.getLogger("opentelemetry-nextjs");
+const logger = getLogger();
 
 // This route forwards browser telemetry with the collector's credentials
 // attached, so the caller-supplied path is matched against a fixed set of OTLP

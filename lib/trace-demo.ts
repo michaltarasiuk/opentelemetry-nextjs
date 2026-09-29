@@ -1,12 +1,10 @@
-import { metrics, trace } from "@opentelemetry/api";
-import { wrapTracer } from "@opentelemetry/api/experimental";
-
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
 
 import { sleep } from "@/lib/sleep";
+import { getMeter, getTracer } from "@/lib/telemetry";
 
-const tracer = wrapTracer(trace.getTracer("opentelemetry-nextjs"));
-const meter = metrics.getMeter("opentelemetry-nextjs");
+const tracer = getTracer();
+const meter = getMeter();
 
 const traceDemoCounter = meter.createCounter("demo.trace.runs", {
   description: "Number of trace demo runs",

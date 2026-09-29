@@ -1,10 +1,11 @@
-import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
 
 import { sleep } from "@/lib/sleep";
+import { getLogger } from "@/lib/telemetry";
 
-const logger = logs.getLogger("opentelemetry-nextjs");
+const logger = getLogger();
 
 interface ScenarioProfile {
   delayMs: number;

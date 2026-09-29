@@ -1,6 +1,6 @@
 "use server";
 
-import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import { runLogsDemo } from "@/lib/logs-demo";
 import { runMetricsDemo } from "@/lib/metrics-demo";
@@ -9,9 +9,10 @@ import {
   METRIC_SCENARIO_SCHEMA,
   TRACE_SCENARIO_SCHEMA,
 } from "@/lib/schemas";
+import { getLogger } from "@/lib/telemetry";
 import { runTraceDemo } from "@/lib/trace-demo";
 
-const logger = logs.getLogger("opentelemetry-nextjs");
+const logger = getLogger();
 
 export async function runTraceDemoAction(scenario: unknown) {
   const parsed = TRACE_SCENARIO_SCHEMA.safeParse(scenario);

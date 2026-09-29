@@ -1,18 +1,16 @@
-import { metrics } from "@opentelemetry/api";
-import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import type { HealthResponse } from "@/lib/schemas";
 
 import { env } from "@/env";
+import { getLogger, getMeter } from "@/lib/telemetry";
 
-const logger = logs.getLogger("opentelemetry-nextjs");
+const logger = getLogger();
 
-const healthCheckCounter = metrics
-  .getMeter("opentelemetry-nextjs")
-  .createCounter("demo.health.checks", {
-    description: "Number of health endpoint checks",
-    unit: "1",
-  });
+const healthCheckCounter = getMeter().createCounter("demo.health.checks", {
+  description: "Number of health endpoint checks",
+  unit: "1",
+});
 
 export async function GET() {
   healthCheckCounter.add(1, { "http.route": "/api/health" });
