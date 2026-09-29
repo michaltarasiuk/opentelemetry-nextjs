@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  startTransition,
-  useActionState,
-  useState,
-  type ReactNode,
-} from "react";
+import { startTransition, useActionState, useState } from "react";
 import { toast } from "sonner";
 
 import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
@@ -50,7 +45,7 @@ async function reduceTraceRun(
   }
 }
 
-function TracePlaygroundProvider({ children }: { children: ReactNode }) {
+export function TracePlayground() {
   const [scenario, setScenario] = useState<TraceScenario>("fast");
   const [runState, dispatchRun, pending] = useActionState(
     reduceTraceRun,
@@ -79,69 +74,48 @@ function TracePlaygroundProvider({ children }: { children: ReactNode }) {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      {children}
+      <DemoPlayground.Frame>
+        <DemoPlayground.Header
+          title="Trace playground"
+          description="Trigger scenarios from the browser to generate linked client and server spans."
+        />
+        <DemoPlayground.Content>
+          <DemoPlayground.ScenarioField>
+            <TabsList>
+              <TabsTrigger value="fast">Fast</TabsTrigger>
+              <TabsTrigger value="slow">Slow</TabsTrigger>
+              <TabsTrigger value="error">Error</TabsTrigger>
+            </TabsList>
+            <TabsContent value="fast">
+              <FieldDescription>
+                Cache hit with short delays across validateRequest, cacheLookup,
+                and buildResponse.
+              </FieldDescription>
+            </TabsContent>
+            <TabsContent value="slow">
+              <FieldDescription>
+                Cache miss with a simulated DB query. Compare latency in your
+                collector.
+              </FieldDescription>
+            </TabsContent>
+            <TabsContent value="error">
+              <FieldDescription>
+                Fails inside dbQuery, returning HTTP 500 with a failed span
+                status.
+              </FieldDescription>
+            </TabsContent>
+          </DemoPlayground.ScenarioField>
+        </DemoPlayground.Content>
+        <DemoPlayground.Actions>
+          <DemoPlayground.RunButton pendingLabel="Running…">
+            Run trace
+          </DemoPlayground.RunButton>
+          <DemoPlayground.Response>
+            <DemoPlayground.ErrorAlert title="Trace failed" />
+            <DemoPlayground.Result pendingLabel="Running…" />
+          </DemoPlayground.Response>
+        </DemoPlayground.Actions>
+      </DemoPlayground.Frame>
     </DemoPlayground.Provider>
-  );
-}
-
-function TraceScenarioTabs() {
-  return (
-    <>
-      <TabsList>
-        <TabsTrigger value="fast">Fast</TabsTrigger>
-        <TabsTrigger value="slow">Slow</TabsTrigger>
-        <TabsTrigger value="error">Error</TabsTrigger>
-      </TabsList>
-      <TabsContent value="fast">
-        <FieldDescription>
-          Cache hit with short delays across validateRequest, cacheLookup, and
-          buildResponse.
-        </FieldDescription>
-      </TabsContent>
-      <TabsContent value="slow">
-        <FieldDescription>
-          Cache miss with a simulated DB query. Compare latency in your
-          collector.
-        </FieldDescription>
-      </TabsContent>
-      <TabsContent value="error">
-        <FieldDescription>
-          Fails inside dbQuery, returning HTTP 500 with a failed span status.
-        </FieldDescription>
-      </TabsContent>
-    </>
-  );
-}
-
-function TracePlaygroundFrame() {
-  return (
-    <DemoPlayground.Frame>
-      <DemoPlayground.Header
-        title="Trace playground"
-        description="Trigger scenarios from the browser to generate linked client and server spans."
-      />
-      <DemoPlayground.Content>
-        <DemoPlayground.ScenarioField>
-          <TraceScenarioTabs />
-        </DemoPlayground.ScenarioField>
-      </DemoPlayground.Content>
-      <DemoPlayground.Actions>
-        <DemoPlayground.RunButton pendingLabel="Running…">
-          Run trace
-        </DemoPlayground.RunButton>
-        <DemoPlayground.Response>
-          <DemoPlayground.ErrorAlert title="Trace failed" />
-          <DemoPlayground.Result pendingLabel="Running…" />
-        </DemoPlayground.Response>
-      </DemoPlayground.Actions>
-    </DemoPlayground.Frame>
-  );
-}
-
-export function TracePlayground() {
-  return (
-    <TracePlaygroundProvider>
-      <TracePlaygroundFrame />
-    </TracePlaygroundProvider>
   );
 }

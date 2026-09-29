@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  startTransition,
-  use,
-  useActionState,
-  useState,
-  type ReactNode,
-} from "react";
+import { startTransition, useActionState, useState } from "react";
 import { toast } from "sonner";
 
 import type { MetricDemoResponse, MetricScenario } from "@/lib/schemas";
@@ -47,8 +40,6 @@ const INITIAL_RUN_STATE: MetricsRunState = {
   },
 };
 
-const MetricsSessionContext = createContext<SessionTotals | null>(null);
-
 async function reduceMetricsRun(
   previous: MetricsRunState,
   scenario: MetricScenario,
@@ -82,7 +73,7 @@ async function reduceMetricsRun(
   }
 }
 
-function MetricsPlaygroundProvider({ children }: { children: ReactNode }) {
+export function MetricsPlayground() {
   const [scenario, setScenario] = useState<MetricScenario>("increment");
   const [runState, dispatchRun, pending] = useActionState(
     reduceMetricsRun,
@@ -101,6 +92,8 @@ function MetricsPlaygroundProvider({ children }: { children: ReactNode }) {
     startTransition(() => dispatchRun(scenario));
   }
 
+  const { totals } = runState;
+
   return (
     <DemoPlayground.Provider
       state={{
@@ -111,109 +104,74 @@ function MetricsPlaygroundProvider({ children }: { children: ReactNode }) {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      <MetricsSessionContext value={runState.totals}>
-        {children}
-      </MetricsSessionContext>
+      <DemoPlayground.Frame>
+        <DemoPlayground.Header
+          title="Metrics playground"
+          description="Emit server counters and histograms, plus a browser click counter, to your collector."
+        />
+        <DemoPlayground.Content>
+          <DemoPlayground.ScenarioField>
+            <TabsList>
+              <TabsTrigger value="increment">Increment</TabsTrigger>
+              <TabsTrigger value="batch">Batch</TabsTrigger>
+              <TabsTrigger value="error">Error</TabsTrigger>
+            </TabsList>
+            <TabsContent value="increment">
+              <FieldDescription>
+                Records one demo.requests counter, a small duration histogram,
+                and +1 cache delta.
+              </FieldDescription>
+            </TabsContent>
+            <TabsContent value="batch">
+              <FieldDescription>
+                Records five request counters and a larger cache delta in one
+                export window.
+              </FieldDescription>
+            </TabsContent>
+            <TabsContent value="error">
+              <FieldDescription>
+                Still records metrics, then fails so you can compare error rates
+                with successful runs.
+              </FieldDescription>
+            </TabsContent>
+          </DemoPlayground.ScenarioField>
+          <Field>
+            <FieldTitle>Session totals</FieldTitle>
+            <FieldContent>
+              <dl className="grid grid-cols-3 gap-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Runs</dt>
+                  <dd className="font-medium tabular-nums">{totals.runs}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Requests</dt>
+                  <dd className="font-medium tabular-nums">
+                    {totals.requestsRecorded}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Cache</dt>
+                  <dd className="font-medium tabular-nums">
+                    {totals.cacheDelta}
+                  </dd>
+                </div>
+              </dl>
+              <FieldDescription>
+                Local UI feedback. Collector export interval is ~5s.
+              </FieldDescription>
+            </FieldContent>
+          </Field>
+        </DemoPlayground.Content>
+        <DemoPlayground.Actions>
+          <DemoPlayground.RunButton pendingLabel="Recording…">
+            Record metrics
+          </DemoPlayground.RunButton>
+          <DemoPlayground.Response>
+            <DemoPlayground.ErrorAlert title="Metrics run failed" />
+            <DemoPlayground.Result pendingLabel="Recording…" />
+          </DemoPlayground.Response>
+        </DemoPlayground.Actions>
+      </DemoPlayground.Frame>
     </DemoPlayground.Provider>
-  );
-}
-
-function MetricsScenarioTabs() {
-  return (
-    <>
-      <TabsList>
-        <TabsTrigger value="increment">Increment</TabsTrigger>
-        <TabsTrigger value="batch">Batch</TabsTrigger>
-        <TabsTrigger value="error">Error</TabsTrigger>
-      </TabsList>
-      <TabsContent value="increment">
-        <FieldDescription>
-          Records one demo.requests counter, a small duration histogram, and +1
-          cache delta.
-        </FieldDescription>
-      </TabsContent>
-      <TabsContent value="batch">
-        <FieldDescription>
-          Records five request counters and a larger cache delta in one export
-          window.
-        </FieldDescription>
-      </TabsContent>
-      <TabsContent value="error">
-        <FieldDescription>
-          Still records metrics, then fails so you can compare error rates with
-          successful runs.
-        </FieldDescription>
-      </TabsContent>
-    </>
-  );
-}
-
-function MetricsSessionTotals() {
-  const totals = use(MetricsSessionContext);
-  if (!totals) {
-    throw new Error(
-      "MetricsSessionTotals must be used within MetricsPlaygroundProvider",
-    );
-  }
-
-  return (
-    <Field>
-      <FieldTitle>Session totals</FieldTitle>
-      <FieldContent>
-        <dl className="grid grid-cols-3 gap-3 text-sm">
-          <div>
-            <dt className="text-muted-foreground">Runs</dt>
-            <dd className="font-medium tabular-nums">{totals.runs}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Requests</dt>
-            <dd className="font-medium tabular-nums">
-              {totals.requestsRecorded}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Cache</dt>
-            <dd className="font-medium tabular-nums">{totals.cacheDelta}</dd>
-          </div>
-        </dl>
-        <FieldDescription>
-          Local UI feedback. Collector export interval is ~5s.
-        </FieldDescription>
-      </FieldContent>
-    </Field>
-  );
-}
-
-function MetricsPlaygroundFrame() {
-  return (
-    <DemoPlayground.Frame>
-      <DemoPlayground.Header
-        title="Metrics playground"
-        description="Emit server counters and histograms, plus a browser click counter, to your collector."
-      />
-      <DemoPlayground.Content>
-        <DemoPlayground.ScenarioField>
-          <MetricsScenarioTabs />
-        </DemoPlayground.ScenarioField>
-        <MetricsSessionTotals />
-      </DemoPlayground.Content>
-      <DemoPlayground.Actions>
-        <DemoPlayground.RunButton pendingLabel="Recording…">
-          Record metrics
-        </DemoPlayground.RunButton>
-        <DemoPlayground.Response>
-          <DemoPlayground.ErrorAlert title="Metrics run failed" />
-          <DemoPlayground.Result pendingLabel="Recording…" />
-        </DemoPlayground.Response>
-      </DemoPlayground.Actions>
-    </DemoPlayground.Frame>
-  );
-}
-
-export function MetricsPlayground() {
-  return (
-    <MetricsPlaygroundProvider>
-      <MetricsPlaygroundFrame />
-    </MetricsPlaygroundProvider>
   );
 }
