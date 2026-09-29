@@ -16,9 +16,16 @@ export function onRouterTransitionStart(
 
   trace
     .getTracer(`${env.NEXT_PUBLIC_OTEL_SERVICE_NAME}-router`)
-    .startActiveSpan("route.change", (span) => {
-      span.setAttribute("route.url", url);
-      span.setAttribute("route.type", navigationType);
-      span.end();
-    });
+    .startActiveSpan(
+      "route.change",
+      {
+        attributes: {
+          "route.url": url,
+          "route.type": navigationType,
+        },
+      },
+      (span) => {
+        span.end();
+      },
+    );
 }

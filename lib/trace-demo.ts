@@ -12,19 +12,26 @@ const traceDemoCounter = meter.createCounter("demo.trace.runs", {
 });
 
 function validateRequest(scenario: TraceScenario) {
-  return tracer.withActiveSpan("validateRequest", async (span) => {
-    span.setAttribute("demo.scenario", scenario);
-    await sleep(10);
-  });
+  return tracer.withActiveSpan(
+    "validateRequest",
+    { attributes: { "demo.scenario": scenario } },
+    async () => {
+      await sleep(10);
+    },
+  );
 }
 
 function cacheLookup(scenario: TraceScenario) {
-  return tracer.withActiveSpan("cacheLookup", async (span) => {
-    const cacheHit = scenario === "fast";
-    span.setAttribute("cache.hit", cacheHit);
-    await sleep(cacheHit ? 15 : 40);
-    return cacheHit;
-  });
+  const cacheHit = scenario === "fast";
+
+  return tracer.withActiveSpan(
+    "cacheLookup",
+    { attributes: { "cache.hit": cacheHit } },
+    async () => {
+      await sleep(cacheHit ? 15 : 40);
+      return cacheHit;
+    },
+  );
 }
 
 function dbQuery(scenario: TraceScenario) {
@@ -46,40 +53,48 @@ function buildResponse(
   cacheHit: boolean,
   rows: number | null,
 ) {
-  return tracer.withActiveSpan("buildResponse", async (span) => {
-    await sleep(20);
-    span.setAttribute("demo.scenario", scenario);
-    span.setAttribute("cache.hit", cacheHit);
-    if (rows !== null) {
-      span.setAttribute("db.rows", rows);
-    }
-  });
+  return tracer.withActiveSpan(
+    "buildResponse",
+    {
+      attributes: {
+        "demo.scenario": scenario,
+        "cache.hit": cacheHit,
+        ...(rows !== null ? { "db.rows": rows } : {}),
+      },
+    },
+    async () => {
+      await sleep(20);
+    },
+  );
 }
 
 export function runTraceDemo(
   scenario: TraceScenario,
 ): Promise<TraceDemoResponse> {
-  return tracer.withActiveSpan("runTraceDemo", async (span) => {
-    const startedAt = Date.now();
+  return tracer.withActiveSpan(
+    "runTraceDemo",
+    { attributes: { "demo.scenario": scenario } },
+    async (span) => {
+      const startedAt = Date.now();
 
-    span.setAttribute("demo.scenario", scenario);
-    traceDemoCounter.add(1, { "demo.scenario": scenario });
+      traceDemoCounter.add(1, { "demo.scenario": scenario });
 
-    await validateRequest(scenario);
-    const cacheHit = await cacheLookup(scenario);
-    const rows = cacheHit ? null : await dbQuery(scenario);
+      await validateRequest(scenario);
+      const cacheHit = await cacheLookup(scenario);
+      const rows = cacheHit ? null : await dbQuery(scenario);
 
-    await buildResponse(scenario, cacheHit, rows);
+      await buildResponse(scenario, cacheHit, rows);
 
-    const durationMs = Date.now() - startedAt;
-    span.setAttribute("demo.duration_ms", durationMs);
+      const durationMs = Date.now() - startedAt;
+      span.setAttribute("demo.duration_ms", durationMs);
 
-    return {
-      scenario,
-      durationMs,
-      cacheHit,
-      rows,
-      message: cacheHit ? "Served from cache" : "Query completed",
-    };
-  });
+      return {
+        scenario,
+        durationMs,
+        cacheHit,
+        rows,
+        message: cacheHit ? "Served from cache" : "Query completed",
+      };
+    },
+  );
 }
