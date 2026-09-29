@@ -8,14 +8,16 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { TraceDemoResponse, TraceScenario } from "@/lib/schemas";
-
 import { Playground } from "@/components/playground";
 import { FieldDescription } from "@/components/ui/field";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runTraceDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
-import { TRACE_SCENARIO_SCHEMA } from "@/lib/schemas";
+import {
+  TRACE_SCENARIO_SCHEMA,
+  type TraceDemoResponse,
+  type TraceScenario,
+} from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
 
 interface TraceRunState {
@@ -58,9 +60,8 @@ function TracePlaygroundProvider({ children }: { children: ReactNode }) {
   );
 
   function selectScenario(value: string) {
-    const parsed = TRACE_SCENARIO_SCHEMA.safeParse(value);
-    if (parsed.success) {
-      setScenario(parsed.data);
+    if (TRACE_SCENARIO_SCHEMA.validate(value)) {
+      setScenario(value);
     }
   }
 

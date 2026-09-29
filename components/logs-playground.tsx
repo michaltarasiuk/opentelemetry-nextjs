@@ -8,14 +8,16 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
-
 import { Playground } from "@/components/playground";
 import { FieldDescription } from "@/components/ui/field";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runLogsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
-import { LOG_SCENARIO_SCHEMA } from "@/lib/schemas";
+import {
+  LOG_SCENARIO_SCHEMA,
+  type LogDemoResponse,
+  type LogScenario,
+} from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
 
 interface LogsRunState {
@@ -58,9 +60,8 @@ function LogsPlaygroundProvider({ children }: { children: ReactNode }) {
   );
 
   function selectScenario(value: string) {
-    const parsed = LOG_SCENARIO_SCHEMA.safeParse(value);
-    if (parsed.success) {
-      setScenario(parsed.data);
+    if (LOG_SCENARIO_SCHEMA.validate(value)) {
+      setScenario(value);
     }
   }
 

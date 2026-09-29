@@ -10,8 +10,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import type { MetricDemoResponse, MetricScenario } from "@/lib/schemas";
-
 import { Playground } from "@/components/playground";
 import {
   Field,
@@ -22,7 +20,11 @@ import {
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runMetricsDemoAction } from "@/lib/actions";
 import { recordBrowserClick } from "@/lib/metrics.client";
-import { METRIC_SCENARIO_SCHEMA } from "@/lib/schemas";
+import {
+  METRIC_SCENARIO_SCHEMA,
+  type MetricDemoResponse,
+  type MetricScenario,
+} from "@/lib/schemas";
 import { withMinimumDelay } from "@/lib/sleep";
 import { isDefined } from "@/lib/utils";
 
@@ -91,9 +93,8 @@ function MetricsPlaygroundProvider({ children }: { children: ReactNode }) {
   );
 
   function selectScenario(value: string) {
-    const parsed = METRIC_SCENARIO_SCHEMA.safeParse(value);
-    if (parsed.success) {
-      setScenario(parsed.data);
+    if (METRIC_SCENARIO_SCHEMA.validate(value)) {
+      setScenario(value);
     }
   }
 

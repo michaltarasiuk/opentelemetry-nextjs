@@ -1,41 +1,38 @@
 import { z } from "zod";
 
-export const TRACE_SCENARIO_SCHEMA = z.enum(["fast", "slow", "error"]);
-export type TraceScenario = z.infer<typeof TRACE_SCENARIO_SCHEMA>;
+export const TRACE_SCENARIOS = ["fast", "slow", "error"] as const;
+export type TraceScenario = (typeof TRACE_SCENARIOS)[number];
+export const TRACE_SCENARIO_SCHEMA = z.enum(TRACE_SCENARIOS);
 
-export const TRACE_DEMO_RESPONSE_SCHEMA = z.object({
-  scenario: TRACE_SCENARIO_SCHEMA,
-  durationMs: z.number().int().nonnegative(),
-  cacheHit: z.boolean(),
-  rows: z.number().int().nonnegative().nullable(),
-  message: z.string(),
-});
+export type TraceDemoResponse = {
+  scenario: TraceScenario;
+  durationMs: number;
+  cacheHit: boolean;
+  rows: number | null;
+  message: string;
+};
 
-export type TraceDemoResponse = z.infer<typeof TRACE_DEMO_RESPONSE_SCHEMA>;
+export const METRIC_SCENARIOS = ["increment", "batch", "error"] as const;
+export type MetricScenario = (typeof METRIC_SCENARIOS)[number];
+export const METRIC_SCENARIO_SCHEMA = z.enum(METRIC_SCENARIOS);
 
-export const METRIC_SCENARIO_SCHEMA = z.enum(["increment", "batch", "error"]);
-export type MetricScenario = z.infer<typeof METRIC_SCENARIO_SCHEMA>;
+export type MetricDemoResponse = {
+  scenario: MetricScenario;
+  durationMs: number;
+  requestsRecorded: number;
+  cacheDelta: number;
+  message: string;
+};
 
-export const METRIC_DEMO_RESPONSE_SCHEMA = z.object({
-  scenario: METRIC_SCENARIO_SCHEMA,
-  durationMs: z.number().int().nonnegative(),
-  requestsRecorded: z.number().int().positive(),
-  cacheDelta: z.number().int(),
-  message: z.string(),
-});
+export const LOG_SCENARIOS = ["info", "warning", "error"] as const;
+export type LogScenario = (typeof LOG_SCENARIOS)[number];
+export const LOG_SCENARIO_SCHEMA = z.enum(LOG_SCENARIOS);
 
-export type MetricDemoResponse = z.infer<typeof METRIC_DEMO_RESPONSE_SCHEMA>;
-
-export const LOG_SCENARIO_SCHEMA = z.enum(["info", "warning", "error"]);
-export type LogScenario = z.infer<typeof LOG_SCENARIO_SCHEMA>;
-
-export const LOG_DEMO_RESPONSE_SCHEMA = z.object({
-  scenario: LOG_SCENARIO_SCHEMA,
-  durationMs: z.number().int().nonnegative(),
-  message: z.string(),
-});
-
-export type LogDemoResponse = z.infer<typeof LOG_DEMO_RESPONSE_SCHEMA>;
+export type LogDemoResponse = {
+  scenario: LogScenario;
+  durationMs: number;
+  message: string;
+};
 
 export const HEALTH_RESPONSE_SCHEMA = z.object({
   status: z.literal("ok"),
