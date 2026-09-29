@@ -1,6 +1,11 @@
 "use client";
 
-import { startTransition, useActionState, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 
 import type { LogDemoResponse, LogScenario } from "@/lib/schemas";
@@ -45,7 +50,7 @@ async function reduceLogsRun(
   }
 }
 
-export function LogsPlayground() {
+function LogsPlaygroundProvider({ children }: { children: ReactNode }) {
   const [scenario, setScenario] = useState<LogScenario>("info");
   const [runState, dispatchRun, pending] = useActionState(
     reduceLogsRun,
@@ -74,48 +79,69 @@ export function LogsPlayground() {
       }}
       actions={{ setScenario: selectScenario, run }}
     >
-      <Playground.Frame>
-        <Playground.Header
-          title="Logs playground"
-          description="Emit structured log records at various severity levels to your collector."
-        />
-        <Playground.Content>
-          <Playground.ScenarioField>
-            <TabsList>
-              <TabsTrigger value="info">Info</TabsTrigger>
-              <TabsTrigger value="warning">Warning</TabsTrigger>
-              <TabsTrigger value="error">Error</TabsTrigger>
-            </TabsList>
-            <TabsContent value="info">
-              <FieldDescription>
-                Emits a DEBUG record followed by an INFO record with structured
-                attributes.
-              </FieldDescription>
-            </TabsContent>
-            <TabsContent value="warning">
-              <FieldDescription>
-                Emits a WARN record with cache-miss context and fallback
-                strategy attributes.
-              </FieldDescription>
-            </TabsContent>
-            <TabsContent value="error">
-              <FieldDescription>
-                Emits an ERROR record with exception type and message
-                attributes.
-              </FieldDescription>
-            </TabsContent>
-          </Playground.ScenarioField>
-        </Playground.Content>
-        <Playground.Actions>
-          <Playground.RunButton pendingLabel="Emitting…">
-            Emit logs
-          </Playground.RunButton>
-          <Playground.Response>
-            <Playground.ErrorAlert title="Log emission failed" />
-            <Playground.Result pendingLabel="Emitting…" />
-          </Playground.Response>
-        </Playground.Actions>
-      </Playground.Frame>
+      {children}
     </Playground.Provider>
+  );
+}
+
+function LogsScenarioTabs() {
+  return (
+    <>
+      <TabsList>
+        <TabsTrigger value="info">Info</TabsTrigger>
+        <TabsTrigger value="warning">Warning</TabsTrigger>
+        <TabsTrigger value="error">Error</TabsTrigger>
+      </TabsList>
+      <TabsContent value="info">
+        <FieldDescription>
+          Emits a DEBUG record followed by an INFO record with structured
+          attributes.
+        </FieldDescription>
+      </TabsContent>
+      <TabsContent value="warning">
+        <FieldDescription>
+          Emits a WARN record with cache-miss context and fallback strategy
+          attributes.
+        </FieldDescription>
+      </TabsContent>
+      <TabsContent value="error">
+        <FieldDescription>
+          Emits an ERROR record with exception type and message attributes.
+        </FieldDescription>
+      </TabsContent>
+    </>
+  );
+}
+
+function LogsPlaygroundFrame() {
+  return (
+    <Playground.Frame>
+      <Playground.Header
+        title="Logs playground"
+        description="Emit structured log records at various severity levels to your collector."
+      />
+      <Playground.Content>
+        <Playground.ScenarioField>
+          <LogsScenarioTabs />
+        </Playground.ScenarioField>
+      </Playground.Content>
+      <Playground.Actions>
+        <Playground.RunButton pendingLabel="Emitting…">
+          Emit logs
+        </Playground.RunButton>
+        <Playground.Response>
+          <Playground.ErrorAlert title="Log emission failed" />
+          <Playground.Result pendingLabel="Emitting…" />
+        </Playground.Response>
+      </Playground.Actions>
+    </Playground.Frame>
+  );
+}
+
+export function LogsPlayground() {
+  return (
+    <LogsPlaygroundProvider>
+      <LogsPlaygroundFrame />
+    </LogsPlaygroundProvider>
   );
 }
